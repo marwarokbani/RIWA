@@ -204,12 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnDownloadFromFullscreen) btnDownloadFromFullscreen.addEventListener('click', () => triggerExport('png'));
 
-        if (btnOpenShareModal) btnOpenShareModal.addEventListener('click', () => shareModal.classList.add('show'));
+        if (btnOpenShareModal) {
+            btnOpenShareModal.addEventListener('click', () => {
+                renderSharePreviewThumbnail();
+                shareModal.classList.add('show');
+            });
+        }
         if (btnCloseShareModal) btnCloseShareModal.addEventListener('click', () => shareModal.classList.remove('show'));
 
         const btnSharePhotoDirect = document.getElementById('btnSharePhotoDirect');
         if (btnSharePhotoDirect) {
-            btnSharePhotoDirect.addEventListener('click', () => shareAsPhotoPNG());
+            btnSharePhotoDirect.addEventListener('click', () => shareAsPhotoPNG('direct'));
         }
 
         const shareUrl = window.location.href;
@@ -217,17 +222,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnShareWhatsapp) {
             btnShareWhatsapp.addEventListener('click', () => {
-                shareAsPhotoPNG();
+                shareAsPhotoPNG('whatsapp');
+                setTimeout(() => {
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+                }, 400);
             });
         }
         if (btnShareMessenger) {
             btnShareMessenger.addEventListener('click', () => {
-                shareAsPhotoPNG();
+                shareAsPhotoPNG('messenger');
+                setTimeout(() => {
+                    window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
+                }, 400);
             });
         }
         if (btnShareInstagram) {
             btnShareInstagram.addEventListener('click', () => {
-                shareAsPhotoPNG();
+                shareAsPhotoPNG('instagram');
             });
         }
         if (btnCopyLink) {
@@ -238,10 +249,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function shareAsPhotoPNG() {
+    function renderSharePreviewThumbnail() {
         if (!state.currentTemplate) return;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = cardBgImage;
 
-        showToast("Préparation de l'image PNG...");
+        canvas.width = state.currentTemplate.width;
+        canvas.height = state.currentTemplate.height;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        state.layers.forEach(layer => {
+            if (!layer.text.trim()) return;
+
+            ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
+            ctx.textAlign = layer.align;
+            ctx.textBaseline = 'top';
+
+            const x = (layer.pctX / 100.0) * canvas.width;
+            const y = (layer.pctY / 100.0) * canvas.height;
+
+            if (layer.gradient) {
+                const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
+                grad.addColorStop(0, '#bf953f');
+                grad.addColorStop(0.5, '#fcf6ba');
+                grad.addColorStop(1, '#aa771c');
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = layer.color;
+            }
+
+            const lines = layer.text.split('\n');
+            let curY = y;
+
+            lines.forEach(line => {
+                ctx.fillText(line, x, curY);
+                curY += layer.fontSize * 1.3;
+            });
+        });
+
+        const sharePreviewImg = document.getElementById('sharePreviewImg');
+        if (sharePreviewImg) {
+            sharePreviewImg.src = canvas.toDataURL('image/png', 0.85);
+            sharePreviewImg.style.display = 'inline-block';
+        }
+    }
+
+    async function shareAsPhotoPNG(platform = 'direct') {
+        if (!state.currentTemplate) return;
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -286,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
         const fileName = `RIWA_Invitation_${namesSlug}.png`;
 
-        // Auto-save PNG file to user device
+        // Always auto-download PNG photo file to user device
         const downloadLink = document.createElement('a');
         downloadLink.href = dataUrl;
         downloadLink.download = fileName;
@@ -294,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadLink.click();
         document.body.removeChild(downloadLink);
 
-        // Native File Share (iOS Safari, Android Chrome, WhatsApp, Messages)
+        // Native Mobile File Share Sheet (iOS / Android)
         try {
             const response = await fetch(dataUrl);
             const blob = await response.blob();
@@ -313,7 +369,15 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Web Share API fallback:", err);
         }
 
-        showToast(`📸 Photo PNG sauvegardée automatiquement ! Prête à envoyer.`);
+        if (platform === 'messenger') {
+            showToast(`📸 Photo PNG enregistrée ! Envoyez l'image téléchargée dans votre conversation Messenger.`);
+        } else if (platform === 'whatsapp') {
+            showToast(`📸 Photo PNG enregistrée ! Envoyez l'image téléchargée sur WhatsApp.`);
+        } else if (platform === 'instagram') {
+            showToast(`📸 Photo PNG enregistrée dans vos images ! Prête pour votre Story Instagram.`);
+        } else {
+            showToast(`📸 Photo PNG enregistrée automatiquement dans vos téléchargements !`);
+        }
     }
 
     function setupTabs() {

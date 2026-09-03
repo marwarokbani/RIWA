@@ -294,25 +294,34 @@
 
     <!-- Social & Photo Share Modal -->
     <div id="shareModal" class="modal-overlay">
-        <div class="modal-card">
+        <div class="modal-card modal-card-share">
             <button class="btn-close-modal" id="btnCloseShareModal"><i class="fa-solid fa-xmark"></i></button>
-            <h3 style="font-family: var(--font-serif); color: var(--gold-primary); text-align: center; margin-bottom: 6px;">Partager votre Invitation</h3>
-            <p style="font-size:0.84rem; color:var(--text-muted); text-align:center; margin-bottom: 16px;">
-                L'invitation est automatiquement sauvegardée en PNG et partagée sous forme de photo ! 📸
+            <h3 style="font-family: var(--font-serif); color: var(--gold-primary); text-align: center; margin-bottom: 4px;">Partager votre Invitation PNG</h3>
+            <p style="font-size:0.84rem; color:var(--text-muted); text-align:center; margin-bottom: 14px;">
+                L'invitation est générée en image PNG HD prête à être envoyée comme photo ! 📸
             </p>
 
-            <button class="btn btn-gold w-100 btn-share-photo-main" id="btnSharePhotoDirect" style="margin-bottom: 16px; padding: 12px 18px; font-size: 0.92rem;">
-                <i class="fa-solid fa-share-nodes"></i> Partager l'Image PNG (Photo)
+            <!-- Live PNG Thumbnail Preview -->
+            <div class="share-thumbnail-wrapper" style="text-align: center; margin-bottom: 16px;">
+                <img id="sharePreviewImg" src="" alt="Aperçu Invitation PNG" class="share-preview-img" style="max-height: 180px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none;">
+            </div>
+
+            <button class="btn btn-gold w-100 btn-share-photo-main" id="btnSharePhotoDirect" style="margin-bottom: 14px; padding: 12px 18px; font-size: 0.92rem;">
+                <i class="fa-solid fa-download"></i> Télécharger & Enregistrer la Photo PNG
             </button>
             
+            <p style="font-size: 0.78rem; color: var(--gold-dark); text-align: center; font-weight: 600; margin-bottom: 10px;">
+                Partager directement sur :
+            </p>
+
             <div class="social-share-bar">
-                <button class="btn-social btn-whatsapp" id="btnShareWhatsapp" title="Partager sur WhatsApp sous forme d'image">
+                <button class="btn-social btn-whatsapp" id="btnShareWhatsapp" title="Partager sur WhatsApp (Sauvegarde la photo)">
                     <i class="fa-brands fa-whatsapp"></i>
                 </button>
-                <button class="btn-social btn-messenger" id="btnShareMessenger" title="Partager sur Messenger">
+                <button class="btn-social btn-messenger" id="btnShareMessenger" title="Envoyer sur Messenger (Sauvegarde la photo)">
                     <i class="fa-brands fa-facebook-messenger"></i>
                 </button>
-                <button class="btn-social btn-instagram" id="btnShareInstagram" title="Partager sur Instagram">
+                <button class="btn-social btn-instagram" id="btnShareInstagram" title="Publier sur Instagram (Sauvegarde la photo)">
                     <i class="fa-brands fa-instagram"></i>
                 </button>
                 <button class="btn-social btn-copylink" id="btnCopyLink" title="Copier le lien direct">
