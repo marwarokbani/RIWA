@@ -943,3 +943,103 @@ body.riwa-dark-theme {
     opacity: 1;
     transform: translateY(0);
 }
+
+/* ==========================================================================
+   Responsive Mobile & Tablet Media Queries
+   ========================================================================== */
+
+@media (max-width: 992px) {
+    .riwa-header {
+        height: auto;
+        padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .riwa-header-center {
+        order: 3;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .riwa-header-actions {
+        gap: 6px;
+    }
+    .riwa-header-actions .btn {
+        padding: 7px 11px;
+        font-size: 0.8rem;
+    }
+
+    .studio-container {
+        flex-direction: column-reverse;
+        height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+
+    .studio-sidebar {
+        width: 100%;
+        max-height: 48vh;
+        border-right: none;
+        border-top: 1.5px solid var(--border-gold);
+    }
+
+    .studio-stage {
+        min-height: 50vh;
+        flex: 1;
+    }
+
+    .canvas-viewport {
+        padding: 16px;
+    }
+
+    .splash-content {
+        padding: 32px 20px;
+        max-width: 95%;
+        border-radius: 20px;
+    }
+
+    .splash-logo-img-lg {
+        height: 180px !important;
+        max-height: 30vh;
+    }
+
+    .splash-phrase {
+        font-size: 1.1rem;
+    }
+
+    .btn-splash-enter {
+        font-size: 0.9rem !important;
+        padding: 14px 24px !important;
+        letter-spacing: 1.5px !important;
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .riwa-logo-img-lg {
+        height: 40px;
+    }
+    
+    .riwa-header-actions .btn {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+
+    .templates-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .color-palette {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .dropdown-menu {
+        right: -10px;
+        min-width: 250px;
+    }
+
+    .modal-card {
+        padding: 20px 16px;
+    }
+}

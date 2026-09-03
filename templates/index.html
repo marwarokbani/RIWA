@@ -292,15 +292,21 @@
         </div>
     </div>
 
-    <!-- Social Share Modal -->
+    <!-- Social & Photo Share Modal -->
     <div id="shareModal" class="modal-overlay">
         <div class="modal-card">
             <button class="btn-close-modal" id="btnCloseShareModal"><i class="fa-solid fa-xmark"></i></button>
             <h3 style="font-family: var(--font-serif); color: var(--gold-primary); text-align: center; margin-bottom: 6px;">Partager votre Invitation</h3>
-            <p style="font-size:0.82rem; color:var(--text-muted); text-align:center;">« À partager avec ceux qui comptent. »</p>
+            <p style="font-size:0.84rem; color:var(--text-muted); text-align:center; margin-bottom: 16px;">
+                L'invitation est automatiquement sauvegardée en PNG et partagée sous forme de photo ! 📸
+            </p>
+
+            <button class="btn btn-gold w-100 btn-share-photo-main" id="btnSharePhotoDirect" style="margin-bottom: 16px; padding: 12px 18px; font-size: 0.92rem;">
+                <i class="fa-solid fa-share-nodes"></i> Partager l'Image PNG (Photo)
+            </button>
             
             <div class="social-share-bar">
-                <button class="btn-social btn-whatsapp" id="btnShareWhatsapp" title="Partager sur WhatsApp">
+                <button class="btn-social btn-whatsapp" id="btnShareWhatsapp" title="Partager sur WhatsApp sous forme d'image">
                     <i class="fa-brands fa-whatsapp"></i>
                 </button>
                 <button class="btn-social btn-messenger" id="btnShareMessenger" title="Partager sur Messenger">
