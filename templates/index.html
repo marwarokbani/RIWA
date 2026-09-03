@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIWA Studio - Créateur d'Invitations Digitales d'Exception</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Marcellus&family=Montserrat:wght@300;400;600;700&family=Outfit:wght@300;400;600;700&family=Parisienne&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="riwa-dark-theme">
+
+    <!-- Header / Navbar -->
+    <header class="riwa-header">
+        <div class="riwa-brand">
+            <div class="riwa-logo-badge" id="riwaLogoBadge" title="RIWA Digital Studio">
+                <img src="/Logo.png" alt="RIWA Logo" class="riwa-logo-img" id="riwaLogo">
+            </div>
+            <div class="riwa-brand-text">
+                <span class="riwa-brand-title">RIWA STUDIO</span>
+                <span class="riwa-brand-sub">Des Expériences Personnelles et Personnalisées</span>
+            </div>
+        </div>
+
+        <div class="riwa-header-center">
+            <div class="project-title-container">
+                <i class="fa-solid fa-pen-nib gold-icon"></i>
+                <input type="text" id="projectTitleInput" value="Invitation de Mariage - RIWA" placeholder="Titre de votre projet...">
+            </div>
+        </div>
+
+        <div class="riwa-header-actions">
+            <!-- Google Auth Status / Login Button -->
+            <div id="userAuthContainer">
+                <button class="btn btn-glass" id="btnOpenAuthModal">
+                    <i class="fa-brands fa-google text-gold"></i> Se connecter
+                </button>
+            </div>
+
+            <button class="btn btn-glass" id="btnNewProject" title="Recommencer à zéro">
+                <i class="fa-solid fa-rotate-left"></i> Nouveau
+            </button>
+            <button class="btn btn-glass" id="btnSaveProject" title="Sauvegarder le projet localement">
+                <i class="fa-solid fa-floppy-disk"></i> Sauvegarder
+            </button>
+            <div class="export-dropdown">
+                <button class="btn btn-gold" id="btnExportMenu">
+                    <i class="fa-solid fa-download"></i> Télécharger <i class="fa-solid fa-chevron-down ms-1"></i>
+                </button>
+                <div class="dropdown-menu" id="exportDropdownMenu">
+                    <button class="dropdown-item" id="btnExportPNG">
+                        <i class="fa-regular fa-image text-gold"></i> Format Image PNG (Haute Définition)
+                    </button>
+                    <button class="dropdown-item" id="btnExportPDF">
+                        <i class="fa-regular fa-file-pdf text-gold"></i> Format Document PDF (Prêt pour impression)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Studio -->
+    <main class="studio-container">
+        
+        <!-- Left Panel: Controls Sidebar -->
+        <aside class="studio-sidebar">
+            <nav class="sidebar-tabs">
+                <button class="tab-btn active" data-tab="tab-templates">
+                    <i class="fa-solid fa-layer-group"></i> Modèles
+                </button>
+                <button class="tab-btn" data-tab="tab-content">
+                    <i class="fa-solid fa-heading"></i> Textes
+                </button>
+                <button class="tab-btn" data-tab="tab-styling">
+                    <i class="fa-solid fa-palette"></i> Style & Position
+                </button>
+            </nav>
+
+            <div class="sidebar-tab-content">
+
+                <!-- Tab 1: Templates Gallery -->
+                <section class="tab-pane active" id="tab-templates">
+                    <div class="pane-header">
+                        <h3><i class="fa-solid fa-image text-gold"></i> Modèles de Cartes RIWA</h3>
+                        <p>Sélectionnez le fond d'invitation parmi votre collection `Cards`</p>
+                    </div>
+                    <div class="templates-grid" id="templatesGrid">
+                        <div class="loading-spinner">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Chargement des cartes...
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 2: Text Elements Management -->
+                <section class="tab-pane" id="tab-content">
+                    <div class="pane-header">
+                        <h3><i class="fa-solid fa-align-left text-gold"></i> Textes & Données</h3>
+                        <p>Remplissez et gérez les champs de votre invitation</p>
+                    </div>
+
+                    <div class="quick-add-section">
+                        <button class="btn btn-outline-gold w-100" id="btnAddCustomText">
+                            <i class="fa-solid fa-plus"></i> Ajouter un texte personnalisé
+                        </button>
+                    </div>
+
+                    <div class="layers-list" id="layersList">
+                        <!-- Dynamic list of text layers -->
+                    </div>
+                </section>
+
+                <!-- Tab 3: Style & Position Controls -->
+                <section class="tab-pane" id="tab-styling">
+                    <div class="pane-header">
+                        <h3><i class="fa-solid fa-sliders text-gold"></i> Personnalisation Avancée</h3>
+                        <p>Ajustez les polices, couleurs, tailles et emplacements exacts</p>
+                    </div>
+
+                    <div class="layer-selector-wrapper">
+                        <label for="activeLayerSelect">Élément en cours d'édition :</label>
+                        <select id="activeLayerSelect" class="form-select-gold"></select>
+                    </div>
+
+                    <div class="control-group">
+                        <label><i class="fa-solid fa-font"></i> Police d'écriture (Calligraphie & Élégance)</label>
+                        <select id="fontFamilySelect" class="form-select-gold">
+                            <optgroup label="Calligraphie & Mariage">
+                                <option value="Great Vibes" style="font-family: 'Great Vibes', cursive;">Great Vibes (Romantique)</option>
+                                <option value="Alex Brush" style="font-family: 'Alex Brush', cursive;">Alex Brush (Finesse)</option>
+                                <option value="Parisienne" style="font-family: 'Parisienne', cursive;">Parisienne (Moderne)</option>
+                                <option value="Dancing Script" style="font-family: 'Dancing Script', cursive;">Dancing Script</option>
+                                <option value="Tangerine" style="font-family: 'Tangerine', cursive;">Tangerine (Grand Monogramme)</option>
+                            </optgroup>
+                            <optgroup label="Luxe & Serifs Nobles">
+                                <option value="Playfair Display" style="font-family: 'Playfair Display', serif;" selected>Playfair Display</option>
+                                <option value="Cinzel" style="font-family: 'Cinzel', serif;">Cinzel (Impérial)</option>
+                                <option value="Cinzel Decorative" style="font-family: 'Cinzel Decorative', serif;">Cinzel Decorative</option>
+                                <option value="Cormorant Garamond" style="font-family: 'Cormorant Garamond', serif;">Cormorant Garamond</option>
+                                <option value="Marcellus" style="font-family: 'Marcellus', serif;">Marcellus</option>
+                            </optgroup>
+                            <optgroup label="Moderne & Épuré">
+                                <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
+                                <option value="Outfit" style="font-family: 'Outfit', sans-serif;">Outfit</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <!-- Color Swatches & Color Picker -->
+                    <div class="control-group">
+                        <label><i class="fa-solid fa-fill-drip"></i> Couleur du texte & Dégradés Métalliques</label>
+                        <div class="color-palette">
+                            <!-- Solid Colors -->
+                            <button class="color-swatch active" style="background-color: #d4af37;" data-color="#d4af37" title="Or Pur (Gold)"></button>
+                            <button class="color-swatch" style="background-color: #b76e79;" data-color="#b76e79" title="Rose Gold"></button>
+                            <button class="color-swatch" style="background-color: #ffffff;" data-color="#ffffff" title="Blanc Pur"></button>
+                            <button class="color-swatch" style="background-color: #111111;" data-color="#111111" title="Noir Noirceur"></button>
+                            <button class="color-swatch" style="background-color: #046307;" data-color="#046307" title="Émeraude Royale"></button>
+                            <button class="color-swatch" style="background-color: #002366;" data-color="#002366" title="Bleu Nuit"></button>
+                            <!-- Metallic Gradients -->
+                            <button class="color-swatch gradient-swatch" style="background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);" data-color="gradient-gold" data-gradient="gold" title="Dégradé Or Fondu"></button>
+                            <button class="color-swatch gradient-swatch" style="background: linear-gradient(135deg, #b76e79, #ffd1d7, #e0a3ad);" data-color="gradient-rosegold" data-gradient="rosegold" title="Dégradé Rose Gold"></button>
+                            <button class="color-swatch gradient-swatch" style="background: linear-gradient(135deg, #046307, #50c878, #a2e8dd);" data-color="gradient-emerald" data-gradient="emerald" title="Dégradé Émeraude"></button>
+                            <button class="color-swatch gradient-swatch" style="background: linear-gradient(135deg, #ff7e5f, #feb47b, #e06d53);" data-color="gradient-sunset" data-gradient="sunset" title="Dégradé Sunset Impérial"></button>
+                        </div>
+                        <div class="custom-color-row">
+                            <span>Couleur personnalisée :</span>
+                            <input type="color" id="customColorPicker" value="#d4af37">
+                            <input type="text" id="customColorHex" value="#d4af37" maxlength="7" class="input-hex">
+                        </div>
+                    </div>
+
+                    <!-- Font Size & Spacing -->
+                    <div class="control-group">
+                        <div class="slider-header">
+                            <label><i class="fa-solid fa-text-height"></i> Taille de Police</label>
+                            <span id="fontSizeVal" class="badge-val">28px</span>
+                        </div>
+                        <input type="range" id="fontSizeRange" min="12" max="140" value="28" class="form-range-gold">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="slider-header">
+                            <label><i class="fa-solid fa-text-width"></i> Espacement des lettres</label>
+                            <span id="letterSpacingVal" class="badge-val">0px</span>
+                        </div>
+                        <input type="range" id="letterSpacingRange" min="0" max="25" value="0" step="0.5" class="form-range-gold">
+                    </div>
+
+                    <!-- Alignment & Format -->
+                    <div class="control-group">
+                        <label><i class="fa-solid fa-align-center"></i> Alignement</label>
+                        <div class="btn-group-toggle">
+                            <button class="btn-toggle" data-align="left" title="Aligner à gauche"><i class="fa-solid fa-align-left"></i></button>
+                            <button class="btn-toggle active" data-align="center" title="Centrer"><i class="fa-solid fa-align-center"></i></button>
+                            <button class="btn-toggle" data-align="right" title="Aligner à droite"><i class="fa-solid fa-align-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Fine Position Sliders (Alternative to Drag & Drop) -->
+                    <div class="control-group position-sliders">
+                        <label><i class="fa-solid fa-arrows-up-down-left-right"></i> Ajustement Précis de la Position</label>
+                        <div class="slider-row">
+                            <span>Position X:</span>
+                            <input type="range" id="posXRange" min="0" max="1000" value="400" class="form-range-gold">
+                            <span id="posXVal" class="badge-val">400</span>
+                        </div>
+                        <div class="slider-row">
+                            <span>Position Y:</span>
+                            <input type="range" id="posYRange" min="0" max="1600" value="300" class="form-range-gold">
+                            <span id="posYVal" class="badge-val">300</span>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </aside>
+
+        <!-- Center Studio: Interactive Canvas Stage -->
+        <section class="studio-stage">
+            
+            <!-- Canvas Toolbar -->
+            <div class="stage-toolbar">
+                <div class="zoom-controls">
+                    <button class="btn-icon" id="btnZoomOut" title="Zoom Arrière"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                    <span id="zoomPercent">100%</span>
+                    <button class="btn-icon" id="btnZoomIn" title="Zoom Avant"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                    <button class="btn-icon" id="btnZoomReset" title="Réinitialiser le zoom"><i class="fa-solid fa-expand"></i></button>
+                </div>
+                <div class="canvas-hints">
+                    <span><i class="fa-solid fa-hand-pointer text-gold"></i> Cliquez et faites glisser le texte directement sur la carte pour changer sa position !</span>
+                </div>
+                <div class="grid-controls">
+                    <button class="btn-icon active" id="btnToggleGuide" title="Afficher/Masquer les lignes de centrage">
+                        <i class="fa-solid fa-border-none"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Viewport -->
+            <div class="canvas-viewport" id="canvasViewport">
+                <div class="canvas-wrapper" id="canvasWrapper">
+                    <!-- Background Template Image -->
+                    <img id="cardBgImage" src="" alt="Modèle d'invitation RIWA" class="card-bg-img" crossorigin="anonymous">
+                    
+                    <!-- Interactive Text Overlay Layer -->
+                    <div id="interactiveStage" class="interactive-stage"></div>
+
+                    <!-- Alignment Guide Lines -->
+                    <div class="guide-line guide-v" id="guideV"></div>
+                    <div class="guide-line guide-h" id="guideH"></div>
+                </div>
+            </div>
+
+            <!-- Status bar -->
+            <footer class="stage-footer">
+                <span id="statusTemplateName"><i class="fa-regular fa-image"></i> Modèle: Aucun</span>
+                <span id="statusResolution"><i class="fa-solid fa-ruler-combined"></i> Dimensions: -</span>
+                <span id="statusLayersCount"><i class="fa-solid fa-layer-group"></i> Textes: 0</span>
+            </footer>
+        </section>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="riwaToast" class="riwa-toast">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toastMessage">Action effectuée avec succès</span>
+    </div>
+
+    <!-- Luxury Splash Screen Overlay -->
+    <div id="riwaSplashScreen" class="riwa-splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo-wrapper">
+                <img src="/Logo.png" alt="RIWA Logo" class="splash-logo-img">
+            </div>
+            <h1 class="splash-title">RIWA STUDIO</h1>
+            <h2 class="splash-subtitle">Des Expériences Personnelles et Personnalisées</h2>
+            <p class="splash-description">
+                Bienvenue dans l'univers de la création d'invitations digitales d'exception. 
+                Personnalisez vos modèles de cartes de mariage, ajustez vos polices, couleurs et emplacements sur-mesure en toute simplicité.
+            </p>
+            <div class="splash-actions">
+                <button class="btn btn-gold btn-splash-enter" id="btnEnterStudio">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Découvrir le Studio RIWA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Auth Modal -->
+    <div id="googleAuthModal" class="modal-overlay">
+        <div class="auth-modal-card">
+            <button class="btn-close-modal" id="btnCloseAuthModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="auth-header">
+                <div class="riwa-logo-badge style="display:inline-flex;">
+                    <img src="/Logo.png" alt="RIWA" style="height:36px;">
+                </div>
+                <h3>Connexion Compte RIWA</h3>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Connectez-vous pour recevoir votre email de bienvenue</p>
+            </div>
+            <form id="googleLoginForm">
+                <button type="button" class="btn-google-login" id="btnSimulateGoogleAuth">
+                    <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.616z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+                    Continuer avec Google
+                </button>
+                <div class="form-group-gold">
+                    <label>Votre nom complet :</label>
+                    <input type="text" id="authNameInput" class="form-control-gold" placeholder="Mariem BENANI" value="Mariem Benani">
+                </div>
+                <div class="form-group-gold">
+                    <label>Adresse Gmail :</label>
+                    <input type="email" id="authEmailInput" class="form-control-gold" placeholder="mariem@gmail.com" value="mariem.benani@gmail.com">
+                </div>
+                <button type="submit" class="btn btn-gold w-100" style="margin-top:10px;">
+                    <i class="fa-solid fa-paper-plane"></i> Valider et recevoir mon email de bienvenue
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

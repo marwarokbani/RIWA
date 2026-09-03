@@ -1,0 +1,86 @@
+{
+  "title": "Invitation de Mariage - RIWA",
+  "template": {
+    "filename": "3f349e2a041fa25ac909d4ba2d6cf9e5.jpg",
+    "height": 1600,
+    "id": "template_1",
+    "title": "Modèle RIWA 1",
+    "url": "/Cards/3f349e2a041fa25ac909d4ba2d6cf9e5.jpg",
+    "width": 903
+  },
+  "layers": [
+    {
+      "id": "layer_monogram",
+      "label": "Monogramme / Initiales",
+      "text": "S  &  M",
+      "fontFamily": "Tangerine",
+      "fontSize": 72,
+      "color": "#d4af37",
+      "align": "center",
+      "letterSpacing": 2,
+      "x": 452,
+      "y": 220
+    },
+    {
+      "id": "layer_names",
+      "label": "Noms des Mariés",
+      "text": "Sarah  &  Mohamed",
+      "fontFamily": "Tangerine",
+      "fontSize": 70,
+      "color": "#d4af37",
+      "align": "center",
+      "letterSpacing": 0,
+      "x": 452,
+      "y": 503
+    },
+    {
+      "id": "layer_formula",
+      "label": "Formule d'invitation",
+      "text": "ont la joie de vous inviter à célébrer leur union",
+      "fontFamily": "Playfair Display",
+      "fontSize": 29,
+      "color": "#d4af37",
+      "align": "center",
+      "letterSpacing": 1,
+      "x": 452,
+      "y": 656
+    },
+    {
+      "id": "layer_date",
+      "label": "Date & Heure",
+      "text": "SAMEDI 18 JUILLET 2026 — 17H00",
+      "fontFamily": "Cinzel",
+      "fontSize": 24,
+      "color": "#d4af37",
+      "align": "center",
+      "letterSpacing": 3,
+      "x": 452,
+      "y": 801
+    },
+    {
+      "id": "layer_venue",
+      "label": "Lieu de célébration",
+      "text": "Palais des Roses\nCasablanca, Maroc",
+      "fontFamily": "Cormorant Garamond",
+      "fontSize": 24,
+      "color": "#ffffff",
+      "align": "center",
+      "letterSpacing": 1,
+      "x": 452,
+      "y": 949
+    },
+    {
+      "id": "layer_rsvp",
+      "label": "RSVP & Contact",
+      "text": "Réponse souhaitée avant le 1er Juin\n06 12 34 56 78",
+      "fontFamily": "Montserrat",
+      "fontSize": 16,
+      "color": "#9aa1b1",
+      "align": "center",
+      "letterSpacing": 1,
+      "x": 452,
+      "y": 1179
+    }
+  ],
+  "updatedAt": "2026-09-03T10:48:33.798Z"
+}
