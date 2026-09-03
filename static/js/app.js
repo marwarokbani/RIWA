@@ -211,54 +211,112 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (btnCloseShareModal) btnCloseShareModal.addEventListener('click', () => shareModal.classList.remove('show'));
 
-        const shareUrl = window.location.href;
-        const shareText = "Découvrez mon invitation de mariage créée sur RIWA — « Un beau moment commence ici. »";
-
-        const btnShareNative = document.getElementById('btnShareNative');
-        if (btnShareNative) {
-            btnShareNative.addEventListener('click', async () => {
-                if (navigator.share) {
-                    try {
-                        await navigator.share({
-                            title: 'Mon Invitation RIWA',
-                            text: shareText,
-                            url: shareUrl
-                        });
-                        showToast("Invitation partagée avec succès ! 🎉");
-                        return;
-                    } catch (err) {
-                        console.log("Native share cancelled or failed", err);
-                    }
-                }
-                navigator.clipboard.writeText(shareUrl);
-                showToast("Lien d'invitation copié dans le presse-papier !");
-            });
+        const btnCopyPhotoPNG = document.getElementById('btnCopyPhotoPNG');
+        if (btnCopyPhotoPNG) {
+            btnCopyPhotoPNG.addEventListener('click', () => copyOrShareImagePNG());
         }
 
         if (btnShareWhatsapp) {
-            btnShareWhatsapp.addEventListener('click', () => {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
-                showToast("Ouverture de WhatsApp...");
-            });
+            btnShareWhatsapp.addEventListener('click', () => copyOrShareImagePNG('whatsapp'));
         }
         if (btnShareMessenger) {
-            btnShareMessenger.addEventListener('click', () => {
-                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
-                showToast("Ouverture de Messenger...");
-            });
+            btnShareMessenger.addEventListener('click', () => copyOrShareImagePNG('messenger'));
         }
         if (btnShareInstagram) {
-            btnShareInstagram.addEventListener('click', () => {
-                navigator.clipboard.writeText(shareUrl);
-                showToast("Lien d'invitation copié ! Prêt à être collé dans votre Story Instagram.");
-            });
+            btnShareInstagram.addEventListener('click', () => copyOrShareImagePNG('instagram'));
         }
         if (btnCopyLink) {
-            btnCopyLink.addEventListener('click', () => {
-                navigator.clipboard.writeText(shareUrl);
-                showToast("Lien d'invitation copié dans le presse-papier !");
-            });
+            btnCopyLink.addEventListener('click', () => copyOrShareImagePNG('copy'));
         }
+    }
+
+    async function copyOrShareImagePNG(platform = 'direct') {
+        if (!state.currentTemplate) return;
+
+        showToast("Génération de la photo PNG...");
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = cardBgImage;
+
+        canvas.width = state.currentTemplate.width;
+        canvas.height = state.currentTemplate.height;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        state.layers.forEach(layer => {
+            if (!layer.text.trim()) return;
+
+            ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
+            ctx.textAlign = layer.align;
+            ctx.textBaseline = 'top';
+
+            const x = (layer.pctX / 100.0) * canvas.width;
+            const y = (layer.pctY / 100.0) * canvas.height;
+
+            if (layer.gradient) {
+                const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
+                grad.addColorStop(0, '#bf953f');
+                grad.addColorStop(0.5, '#fcf6ba');
+                grad.addColorStop(1, '#aa771c');
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = layer.color;
+            }
+
+            const lines = layer.text.split('\n');
+            let curY = y;
+
+            lines.forEach(line => {
+                ctx.fillText(line, x, curY);
+                curY += layer.fontSize * 1.3;
+            });
+        });
+
+        // Convert canvas to Blob
+        canvas.toBlob(async (blob) => {
+            if (!blob) return;
+
+            const namesLayer = state.layers.find(l => l.id === 'layer_names');
+            const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
+            const fileName = `RIWA_Invitation_${namesSlug}.png`;
+            const file = new File([blob], fileName, { type: 'image/png' });
+
+            // 1. Mobile Web Share API (Share ONLY file photo, NO link)
+            try {
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file] });
+                    showToast("Photo PNG envoyée ! 🎉");
+                    return;
+                }
+            } catch (err) {
+                console.log("Mobile share file error:", err);
+            }
+
+            // 2. Clipboard API: Copy PNG Image bytes directly to Clipboard (for Messenger / WhatsApp Ctrl+V)
+            try {
+                if (navigator.clipboard && window.ClipboardItem) {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    await navigator.clipboard.write([item]);
+
+                    if (platform === 'messenger') {
+                        window.open('https://www.messenger.com', '_blank');
+                        showToast("📸 Photo PNG copiée ! Appuyez sur Ctrl+V (Coller) dans Messenger.");
+                    } else if (platform === 'whatsapp') {
+                        window.open('https://web.whatsapp.com', '_blank');
+                        showToast("📸 Photo PNG copiée ! Appuyez sur Ctrl+V (Coller) dans WhatsApp.");
+                    } else {
+                        showToast("📸 Photo PNG copiée dans le presse-papier ! Appuyez sur Ctrl+V pour coller.");
+                    }
+                    return;
+                }
+            } catch (err) {
+                console.log("Clipboard write failed:", err);
+            }
+
+            // Fallback: If browser cannot copy image directly, prompt user or trigger explicit download
+            triggerExport('png');
+        }, 'image/png', 1.0);
     }
 
     function setupTabs() {
