@@ -1,105 +1,109 @@
 /**
- * RIWA Studio - Interactive Digital Invitation Designer Engine
- * Handles Canvas rendering, Drag & Drop text positioning, Font switching, & High-res Exports
+ * RIWA Studio Engine - Ultra Luxury Edition with Gradients & Extended Palette
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- State Management ---
+    // --- State ---
     const state = {
-        user: null, // Google user profile if logged in
         templates: [],
         currentTemplate: null,
         layers: [
             {
                 id: 'layer_monogram',
-                label: 'Monogramme / Initiales',
+                label: 'Initiales',
                 text: 'S  &  M',
                 fontFamily: 'Tangerine',
-                fontSize: 72,
-                color: 'gradient-gold',
-                gradient: 'gold',
+                fontSize: 68,
+                color: '#d4af37',
+                gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%)',
                 align: 'center',
-                letterSpacing: 2,
-                x: 450,
-                y: 220
+                pctX: 50,
+                pctY: 18
+            },
+            {
+                id: 'layer_quote1',
+                label: 'Phrase d\'accueil',
+                text: '« Un beau moment commence ici. »',
+                fontFamily: 'Cormorant Garamond',
+                fontSize: 22,
+                color: '#8b6914',
+                gradient: null,
+                align: 'center',
+                pctX: 50,
+                pctY: 30
             },
             {
                 id: 'layer_names',
                 label: 'Noms des Mariés',
-                text: 'Sarah  &  Mohamed',
+                text: 'Sarah & Mohamed',
                 fontFamily: 'Great Vibes',
                 fontSize: 54,
-                color: 'gradient-gold',
-                gradient: 'gold',
+                color: '#d4af37',
+                gradient: 'linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%)',
                 align: 'center',
-                letterSpacing: 0,
-                x: 450,
-                y: 380
+                pctX: 50,
+                pctY: 42
             },
             {
-                id: 'layer_formula',
+                id: 'layer_quote2',
                 label: 'Formule d\'invitation',
-                text: 'ont la joie de vous inviter à célébrer leur union',
+                text: '« Un moment à célébrer. Une histoire à partager. »',
                 fontFamily: 'Playfair Display',
-                fontSize: 22,
-                color: '#ffffff',
+                fontSize: 20,
+                color: '#111111',
                 gradient: null,
                 align: 'center',
-                letterSpacing: 1,
-                x: 450,
-                y: 520
+                pctX: 50,
+                pctY: 56
             },
             {
                 id: 'layer_date',
                 label: 'Date & Heure',
-                text: 'SAMEDI 18 JUILLET 2026 — 17H00',
+                text: 'SAMEDI 18 SEPTEMBRE 2026 — 17H00',
                 fontFamily: 'Cinzel',
-                fontSize: 24,
-                color: '#d4af37',
+                fontSize: 22,
+                color: '#8b6914',
                 gradient: null,
                 align: 'center',
-                letterSpacing: 3,
-                x: 450,
-                y: 640
+                pctX: 50,
+                pctY: 68
             },
             {
                 id: 'layer_venue',
                 label: 'Lieu de célébration',
-                text: 'Palais des Roses\nCasablanca, Maroc',
+                text: 'Hôtel Regency, Monastir, Tunisie',
                 fontFamily: 'Cormorant Garamond',
-                fontSize: 24,
-                color: '#ffffff',
+                fontSize: 22,
+                color: '#111111',
                 gradient: null,
                 align: 'center',
-                letterSpacing: 1,
-                x: 450,
-                y: 750
+                pctX: 50,
+                pctY: 78
             },
             {
                 id: 'layer_rsvp',
-                label: 'RSVP & Contact',
-                text: 'Réponse souhaitée avant le 1er Juin\n06 12 34 56 78',
+                label: 'RSVP & Inscription',
+                text: '« À partager avec ceux qui comptent. »\nRSVP: +216 55 222 110',
                 fontFamily: 'Montserrat',
                 fontSize: 16,
-                color: '#9aa1b1',
+                color: '#555555',
                 gradient: null,
                 align: 'center',
-                letterSpacing: 1,
-                x: 450,
-                y: 920
+                pctX: 50,
+                pctY: 88
             }
         ],
         selectedLayerId: 'layer_names',
-        zoomLevel: 1.0,
+        zoomLevel: 0.75,
         showGuides: true,
         drag: {
             active: false,
             layerId: null,
             startX: 0,
             startY: 0,
-            initialX: 0,
-            initialY: 0
+            initialPctX: 50,
+            initialPctY: 50
         },
         resize: {
             active: false,
@@ -112,40 +116,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const riwaSplashScreen = document.getElementById('riwaSplashScreen');
     const btnEnterStudio = document.getElementById('btnEnterStudio');
-    const googleAuthModal = document.getElementById('googleAuthModal');
-    const btnOpenAuthModal = document.getElementById('btnOpenAuthModal');
-    const btnCloseAuthModal = document.getElementById('btnCloseAuthModal');
-    const googleLoginForm = document.getElementById('googleLoginForm');
-    const btnSimulateGoogleAuth = document.getElementById('btnSimulateGoogleAuth');
-    const userAuthContainer = document.getElementById('userAuthContainer');
-    const authEmailInput = document.getElementById('authEmailInput');
-    const authNameInput = document.getElementById('authNameInput');
+
+    const fullscreenModal = document.getElementById('fullscreenModal');
+    const btnFullscreenPreview = document.getElementById('btnFullscreenPreview');
+    const btnCloseFullscreen = document.getElementById('btnCloseFullscreen');
+    const btnCloseFullscreenSecondary = document.getElementById('btnCloseFullscreenSecondary');
+    const fullscreenCanvas = document.getElementById('fullscreenCanvas');
+    const btnDownloadFromFullscreen = document.getElementById('btnDownloadFromFullscreen');
+
+    const shareModal = document.getElementById('shareModal');
+    const btnOpenShareModal = document.getElementById('btnOpenShareModal');
+    const btnCloseShareModal = document.getElementById('btnCloseShareModal');
+    const btnShareWhatsapp = document.getElementById('btnShareWhatsapp');
+    const btnShareMessenger = document.getElementById('btnShareMessenger');
+    const btnShareInstagram = document.getElementById('btnShareInstagram');
+    const btnCopyLink = document.getElementById('btnCopyLink');
 
     const templatesGrid = document.getElementById('templatesGrid');
     const cardBgImage = document.getElementById('cardBgImage');
     const interactiveStage = document.getElementById('interactiveStage');
     const canvasWrapper = document.getElementById('canvasWrapper');
+    const zoomWrapper = document.getElementById('zoomWrapper');
     const layersList = document.getElementById('layersList');
     const activeLayerSelect = document.getElementById('activeLayerSelect');
     
-    // Style Inputs
     const fontFamilySelect = document.getElementById('fontFamilySelect');
     const fontSizeRange = document.getElementById('fontSizeRange');
     const fontSizeVal = document.getElementById('fontSizeVal');
-    const letterSpacingRange = document.getElementById('letterSpacingRange');
-    const letterSpacingVal = document.getElementById('letterSpacingVal');
-    const customColorPicker = document.getElementById('customColorPicker');
-    const customColorHex = document.getElementById('customColorHex');
     const colorSwatches = document.querySelectorAll('.color-swatch');
     const alignButtons = document.querySelectorAll('[data-align]');
-    const posXRange = document.getElementById('posXRange');
-    const posXVal = document.getElementById('posXVal');
-    const posYRange = document.getElementById('posYRange');
-    const posYVal = document.getElementById('posYVal');
 
-    // Toolbar & Actions
     const btnNewProject = document.getElementById('btnNewProject');
-    const btnSaveProject = document.getElementById('btnSaveProject');
     const btnExportMenu = document.getElementById('btnExportMenu');
     const exportDropdownMenu = document.getElementById('exportDropdownMenu');
     const btnExportPNG = document.getElementById('btnExportPNG');
@@ -153,22 +154,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAddCustomText = document.getElementById('btnAddCustomText');
     const btnZoomIn = document.getElementById('btnZoomIn');
     const btnZoomOut = document.getElementById('btnZoomOut');
-    const btnZoomReset = document.getElementById('btnZoomReset');
+    const btnZoomFit = document.getElementById('btnZoomFit');
     const zoomPercent = document.getElementById('zoomPercent');
     const btnToggleGuide = document.getElementById('btnToggleGuide');
     const guideV = document.getElementById('guideV');
     const guideH = document.getElementById('guideH');
 
-    // Status Footer
     const statusTemplateName = document.getElementById('statusTemplateName');
-    const statusResolution = document.getElementById('statusResolution');
     const statusLayersCount = document.getElementById('statusLayersCount');
 
-    // --- Initialization ---
+    // --- Init ---
     init();
 
     async function init() {
-        setupSplashAndAuth();
+        setupSplash();
+        setupModalsAndShare();
         setupTabs();
         setupEventListeners();
         await fetchTemplates();
@@ -178,76 +178,62 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCanvas();
     }
 
-    // --- Splash Screen & Auth logic ---
-    function setupSplashAndAuth() {
+    function setupSplash() {
         if (btnEnterStudio) {
             btnEnterStudio.addEventListener('click', () => {
                 riwaSplashScreen.classList.add('hide');
-            });
-        }
-
-        if (btnOpenAuthModal) {
-            btnOpenAuthModal.addEventListener('click', () => {
-                googleAuthModal.classList.add('show');
-            });
-        }
-
-        if (btnCloseAuthModal) {
-            btnCloseAuthModal.addEventListener('click', () => {
-                googleAuthModal.classList.remove('show');
-            });
-        }
-
-        if (btnSimulateGoogleAuth) {
-            btnSimulateGoogleAuth.addEventListener('click', () => {
-                authNameInput.value = "Mariem Benani";
-                authEmailInput.value = "mariem.benani@gmail.com";
-                submitGoogleLogin();
-            });
-        }
-
-        if (googleLoginForm) {
-            googleLoginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                submitGoogleLogin();
+                showToast("Bienvenue dans RIWA Studio !");
             });
         }
     }
 
-    async function submitGoogleLogin() {
-        const name = authNameInput.value.trim() || 'Membre RIWA';
-        const email = authEmailInput.value.trim() || 'membre@gmail.com';
+    function setupModalsAndShare() {
+        if (btnFullscreenPreview) btnFullscreenPreview.addEventListener('click', generateFullscreenPreview);
+        
+        const closeFullscreen = () => fullscreenModal.classList.remove('show');
+        if (btnCloseFullscreen) btnCloseFullscreen.addEventListener('click', closeFullscreen);
+        if (btnCloseFullscreenSecondary) btnCloseFullscreenSecondary.addEventListener('click', closeFullscreen);
 
-        state.user = { name, email };
-        googleAuthModal.classList.remove('show');
-
-        // Update header user badge
-        userAuthContainer.innerHTML = `
-            <div class="user-badge-header">
-                <i class="fa-brands fa-google text-gold"></i>
-                <span>${name}</span>
-            </div>
-        `;
-
-        showToast(`Bienvenue ${name} ! Envoi de votre email en cours...`);
-
-        // Send Welcome Email API call
-        try {
-            const res = await fetch('/api/send-welcome-email', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email })
-            });
-            const data = await res.json();
-            if (data.success) {
-                showToast(`Email de bienvenue envoyé à ${email} ! 📧`);
+        // ESC Key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fullscreenModal.classList.remove('show');
+                shareModal.classList.remove('show');
             }
-        } catch (err) {
-            console.error("Welcome email error:", err);
+        });
+
+        if (btnDownloadFromFullscreen) btnDownloadFromFullscreen.addEventListener('click', () => triggerExport('png'));
+
+        if (btnOpenShareModal) btnOpenShareModal.addEventListener('click', () => shareModal.classList.add('show'));
+        if (btnCloseShareModal) btnCloseShareModal.addEventListener('click', () => shareModal.classList.remove('show'));
+
+        const shareUrl = window.location.href;
+        const shareText = "Découvrez mon invitation de mariage créée sur RIWA Studio — « Un beau moment commence ici. »";
+
+        if (btnShareWhatsapp) {
+            btnShareWhatsapp.addEventListener('click', () => {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+            });
+        }
+        if (btnShareMessenger) {
+            btnShareMessenger.addEventListener('click', () => {
+                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
+            });
+        }
+        if (btnShareInstagram) {
+            btnShareInstagram.addEventListener('click', () => {
+                navigator.clipboard.writeText(shareUrl);
+                showToast("Lien copié ! Vous pouvez le coller en Story Instagram.");
+            });
+        }
+        if (btnCopyLink) {
+            btnCopyLink.addEventListener('click', () => {
+                navigator.clipboard.writeText(shareUrl);
+                showToast("Lien d'invitation copié dans le presse-papier !");
+            });
         }
     }
 
-    // --- Tab Switching ---
     function setupTabs() {
         const tabBtns = document.querySelectorAll('.sidebar-tabs .tab-btn');
         tabBtns.forEach(btn => {
@@ -262,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- API Calls ---
     async function fetchTemplates() {
         try {
             const response = await fetch('/api/templates');
@@ -273,11 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTemplatesGrid(data.templates);
                 selectTemplate(data.templates[0]);
             } else {
-                templatesGrid.innerHTML = `<div class="loading-spinner"><i class="fa-solid fa-triangle-exclamation"></i> Aucun modèle trouvé dans le dossier Cards.</div>`;
+                templatesGrid.innerHTML = `<div class="loading-spinner">Aucun modèle dans Cards.</div>`;
             }
         } catch (err) {
-            console.error("Error fetching templates:", err);
-            templatesGrid.innerHTML = `<div class="loading-spinner"><i class="fa-solid fa-triangle-exclamation"></i> Erreur lors du chargement des modèles.</div>`;
+            console.error("Error loading cards:", err);
         }
     }
 
@@ -301,42 +285,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         cardBgImage.onload = () => {
-            const w = tmpl.width;
-            const h = tmpl.height;
-            
             canvasWrapper.style.width = `${cardBgImage.clientWidth}px`;
             canvasWrapper.style.height = `${cardBgImage.clientHeight}px`;
-            
-            posXRange.max = w;
-            posYRange.max = h;
-            
-            // Adjust default initial positions relative to card width
-            state.layers.forEach(layer => {
-                if (layer.x === 450 || layer.x > w) {
-                    layer.x = Math.round(w / 2);
-                }
-            });
-
             statusTemplateName.innerHTML = `<i class="fa-regular fa-image"></i> ${tmpl.filename}`;
-            statusResolution.innerHTML = `<i class="fa-solid fa-ruler-combined"></i> ${w} × ${h} px`;
-            
+            autoFitZoom();
             renderCanvas();
         };
 
         cardBgImage.src = tmpl.url;
     }
 
-    // --- Interactive Stage & Rendering ---
+    function autoFitZoom() {
+        const viewportHeight = window.innerHeight - 200;
+        const cardHeight = cardBgImage.clientHeight || 800;
+        if (cardHeight > 0) {
+            const optimalZoom = Math.min(0.85, Math.max(0.45, viewportHeight / cardHeight));
+            setZoom(optimalZoom);
+        }
+    }
+
+    // --- Stage Render with Gradient & Solid Color Support ---
     function renderCanvas() {
         interactiveStage.innerHTML = '';
         statusLayersCount.innerHTML = `<i class="fa-solid fa-layer-group"></i> Textes: ${state.layers.length}`;
 
         if (!state.currentTemplate) return;
 
-        const naturalW = state.currentTemplate.width;
-        const naturalH = state.currentTemplate.height;
-        const displayedW = cardBgImage.clientWidth || 450;
-        const scale = displayedW / naturalW;
+        const stageWidth = cardBgImage.clientWidth || 450;
+        const scale = stageWidth / state.currentTemplate.width;
 
         state.layers.forEach(layer => {
             const isSelected = layer.id === state.selectedLayerId;
@@ -344,56 +320,54 @@ document.addEventListener('DOMContentLoaded', () => {
             el.className = `canvas-text-element ${isSelected ? 'selected' : ''}`;
             el.setAttribute('data-id', layer.id);
 
-            // Font & Size
             el.style.fontFamily = `'${layer.fontFamily}', serif`;
             el.style.fontSize = `${layer.fontSize * scale}px`;
-            el.style.letterSpacing = `${layer.letterSpacing * scale}px`;
             el.style.textAlign = layer.align;
-            el.style.lineHeight = '1.25';
+            el.style.lineHeight = '1.3';
 
-            // Color / Gradient handling
-            if (layer.color.startsWith('gradient-') || layer.gradient) {
-                const gType = layer.gradient || layer.color.replace('gradient-', '');
-                el.classList.add(`text-gradient-${gType}`);
+            // Apply Gradient or Solid Color
+            if (layer.gradient) {
+                el.style.backgroundImage = layer.gradient;
+                el.style.webkitBackgroundClip = 'text';
+                el.style.webkitTextFillColor = 'transparent';
+                el.style.color = 'transparent';
             } else {
+                el.style.backgroundImage = 'none';
+                el.style.webkitBackgroundClip = 'unset';
+                el.style.webkitTextFillColor = 'unset';
                 el.style.color = layer.color;
             }
 
-            // Positioning
-            const posX = layer.x * scale;
-            const posY = layer.y * scale;
-            el.style.top = `${posY}px`;
+            el.style.top = `${layer.pctY}%`;
+            el.style.left = `${layer.pctX}%`;
 
             if (layer.align === 'center') {
-                el.style.left = `${posX}px`;
                 el.style.transform = 'translateX(-50%)';
             } else if (layer.align === 'right') {
-                el.style.left = `${posX}px`;
                 el.style.transform = 'translateX(-100%)';
             } else {
-                el.style.left = `${posX}px`;
                 el.style.transform = 'none';
             }
 
             el.textContent = layer.text;
 
-            // Append Resize Handle for active element
+            // Resize Corner
             if (isSelected) {
-                const resizeHandle = document.createElement('div');
-                resizeHandle.className = 'resize-handle';
-                resizeHandle.title = 'Glissez pour changer la taille du texte';
-                resizeHandle.addEventListener('mousedown', (e) => startResize(e, layer.id));
-                resizeHandle.addEventListener('touchstart', (e) => startResize(e, layer.id), { passive: false });
-                el.appendChild(resizeHandle);
+                const resizeCorner = document.createElement('div');
+                resizeCorner.className = 'resize-corner';
+                resizeCorner.title = 'Tirer pour agrandir/réduire';
+                resizeCorner.addEventListener('mousedown', (e) => startResize(e, layer.id));
+                resizeCorner.addEventListener('touchstart', (e) => startResize(e, layer.id), { passive: false });
+                el.appendChild(resizeCorner);
             }
 
-            // Select & Drag
+            // Drag event listeners
             el.addEventListener('mousedown', (e) => {
-                if (e.target.classList.contains('resize-handle')) return;
+                if (e.target.classList.contains('resize-corner')) return;
                 startDrag(e, layer.id);
             });
             el.addEventListener('touchstart', (e) => {
-                if (e.target.classList.contains('resize-handle')) return;
+                if (e.target.classList.contains('resize-corner')) return;
                 startDrag(e, layer.id);
             }, { passive: false });
 
@@ -403,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         syncStyleControls();
     }
 
-    // --- Drag & Drop Movement Engine ---
+    // --- Drag Positioning ---
     function startDrag(e, layerId) {
         e.preventDefault();
         e.stopPropagation();
@@ -424,8 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
             layerId: layerId,
             startX: pointerX,
             startY: pointerY,
-            initialX: layer.x,
-            initialY: layer.y
+            initialPctX: layer.pctX,
+            initialPctY: layer.pctY
         };
 
         document.addEventListener('mousemove', onDrag);
@@ -435,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onDrag(e) {
-        if (!state.drag.active || !state.currentTemplate) return;
+        if (!state.drag.active) return;
         e.preventDefault();
 
         const pointerX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -444,31 +418,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const deltaX = pointerX - state.drag.startX;
         const deltaY = pointerY - state.drag.startY;
 
-        const displayedW = cardBgImage.clientWidth || 450;
-        const naturalW = state.currentTemplate.width;
-        const scale = naturalW / displayedW;
+        const stageWidth = cardBgImage.clientWidth || 450;
+        const stageHeight = cardBgImage.clientHeight || 750;
+
+        const deltaPctX = (deltaX / stageWidth) * 100;
+        const deltaPctY = (deltaY / stageHeight) * 100;
 
         const layer = state.layers.find(l => l.id === state.drag.layerId);
         if (layer) {
-            let newX = Math.round(state.drag.initialX + (deltaX * scale));
-            let newY = Math.round(state.drag.initialY + (deltaY * scale));
+            let newPctX = state.drag.initialPctX + deltaPctX;
+            let newPctY = state.drag.initialPctY + deltaPctY;
 
-            // Snap to center guideline if close
-            const centerX = Math.round(naturalW / 2);
-            if (Math.abs(newX - centerX) < 25) {
-                newX = centerX;
+            if (Math.abs(newPctX - 50) < 3.5) {
+                newPctX = 50;
                 guideV.style.display = state.showGuides ? 'block' : 'none';
             } else {
                 guideV.style.display = 'none';
             }
 
-            layer.x = Math.max(0, Math.min(naturalW, newX));
-            layer.y = Math.max(0, Math.min(state.currentTemplate.height, newY));
-
-            posXRange.value = layer.x;
-            posXVal.textContent = layer.x;
-            posYRange.value = layer.y;
-            posYVal.textContent = layer.y;
+            layer.pctX = Math.max(5, Math.min(95, newPctX));
+            layer.pctY = Math.max(5, Math.min(95, newPctY));
 
             renderCanvas();
         }
@@ -485,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('touchend', stopDrag);
     }
 
-    // --- Dynamic Corner Resize Handle Engine ---
+    // --- Corner Resize ---
     function startResize(e, layerId) {
         e.preventDefault();
         e.stopPropagation();
@@ -517,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const layer = state.layers.find(l => l.id === state.resize.layerId);
         if (layer) {
-            const newSize = Math.max(12, Math.min(160, Math.round(state.resize.initialSize + (deltaY * 0.8))));
+            const newSize = Math.max(12, Math.min(140, Math.round(state.resize.initialSize + (deltaY * 0.6))));
             layer.fontSize = newSize;
 
             fontSizeRange.value = newSize;
@@ -535,21 +504,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('touchend', stopResize);
     }
 
-    // --- Sidebar Layers Management ---
+    // --- Layer Controls ---
     function renderLayersList() {
         layersList.innerHTML = '';
-        state.layers.forEach((layer, idx) => {
+        state.layers.forEach(layer => {
             const item = document.createElement('div');
             item.className = `layer-item ${layer.id === state.selectedLayerId ? 'active' : ''}`;
             
             item.innerHTML = `
                 <div class="layer-header-row">
                     <span class="layer-title-badge"><i class="fa-solid fa-pen"></i> ${layer.label || 'Texte'}</span>
-                    <div class="layer-actions">
-                        <button class="btn-icon-sm danger" data-action="delete" data-id="${layer.id}" title="Supprimer">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
+                    <button class="btn-icon-sm danger" data-action="delete" data-id="${layer.id}">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 </div>
                 <textarea class="layer-input-text" data-id="${layer.id}">${layer.text}</textarea>
             `;
@@ -585,45 +552,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function deleteLayer(layerId) {
-        if (state.layers.length <= 1) {
-            showToast("Vous devez garder au moins un champ de texte !");
-            return;
-        }
+        if (state.layers.length <= 1) return;
         state.layers = state.layers.filter(l => l.id !== layerId);
-        if (state.selectedLayerId === layerId) {
-            state.selectedLayerId = state.layers[0].id;
-        }
+        state.selectedLayerId = state.layers[0].id;
         populateLayerSelector();
         renderLayersList();
         renderCanvas();
-        showToast("Champ supprimé.");
     }
 
     function addCustomTextLayer() {
         const newId = `layer_${Date.now()}`;
-        const newLayer = {
+        state.layers.push({
             id: newId,
             label: 'Texte Personnalisé',
             text: 'Nouveau texte ici...',
             fontFamily: 'Playfair Display',
-            fontSize: 24,
-            color: '#d4af37',
+            fontSize: 22,
+            color: '#4a3505',
             gradient: null,
             align: 'center',
-            letterSpacing: 0,
-            x: state.currentTemplate ? Math.round(state.currentTemplate.width / 2) : 450,
-            y: state.currentTemplate ? Math.round(state.currentTemplate.height / 2) : 500
-        };
-
-        state.layers.push(newLayer);
+            pctX: 50,
+            pctY: 50
+        });
         state.selectedLayerId = newId;
         populateLayerSelector();
         renderLayersList();
         renderCanvas();
-        showToast("Nouveau champ texte ajouté !");
     }
 
-    // --- Synchronize Controls with Selected Layer ---
     function syncStyleControls() {
         const selected = state.layers.find(l => l.id === state.selectedLayerId);
         if (!selected) return;
@@ -631,47 +587,25 @@ document.addEventListener('DOMContentLoaded', () => {
         fontFamilySelect.value = selected.fontFamily;
         fontSizeRange.value = selected.fontSize;
         fontSizeVal.textContent = `${selected.fontSize}px`;
-        letterSpacingRange.value = selected.letterSpacing;
-        letterSpacingVal.textContent = `${selected.letterSpacing}px`;
-
-        if (selected.color.startsWith('#')) {
-            customColorPicker.value = selected.color;
-            customColorHex.value = selected.color;
-        }
 
         colorSwatches.forEach(swatch => {
-            const swatchColor = swatch.getAttribute('data-color');
-            const swatchGradient = swatch.getAttribute('data-gradient');
-            
-            if (swatchGradient && selected.gradient === swatchGradient) {
-                swatch.classList.add('active');
-            } else if (!swatchGradient && !selected.gradient && swatchColor.toLowerCase() === selected.color.toLowerCase()) {
-                swatch.classList.add('active');
-            } else {
-                swatch.classList.remove('active');
-            }
+            const color = swatch.getAttribute('data-color');
+            const hasGrad = swatch.hasAttribute('data-gradient');
+            swatch.classList.toggle('active', color === selected.color && (hasGrad ? !!selected.gradient : !selected.gradient));
         });
 
         alignButtons.forEach(btn => {
             btn.classList.toggle('active', btn.getAttribute('data-align') === selected.align);
         });
-
-        posXRange.value = selected.x;
-        posXVal.textContent = selected.x;
-        posYRange.value = selected.y;
-        posYVal.textContent = selected.y;
     }
 
-    // --- Setup Input Control Listeners ---
     function setupEventListeners() {
-        // Layer select dropdown
         activeLayerSelect.addEventListener('change', (e) => {
             state.selectedLayerId = e.target.value;
             renderLayersList();
             renderCanvas();
         });
 
-        // Font family
         fontFamilySelect.addEventListener('change', (e) => {
             const selected = state.layers.find(l => l.id === state.selectedLayerId);
             if (selected) {
@@ -680,7 +614,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Font size slider
         fontSizeRange.addEventListener('input', (e) => {
             const selected = state.layers.find(l => l.id === state.selectedLayerId);
             if (selected) {
@@ -690,62 +623,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Letter spacing slider
-        letterSpacingRange.addEventListener('input', (e) => {
-            const selected = state.layers.find(l => l.id === state.selectedLayerId);
-            if (selected) {
-                selected.letterSpacing = parseFloat(e.target.value);
-                letterSpacingVal.textContent = `${selected.letterSpacing}px`;
-                renderCanvas();
-            }
-        });
-
-        // Color swatches & Metallic Gradients
         colorSwatches.forEach(swatch => {
             swatch.addEventListener('click', () => {
                 const color = swatch.getAttribute('data-color');
-                const gradient = swatch.getAttribute('data-gradient');
+                const hasGrad = swatch.hasAttribute('data-gradient');
+                const bgStyle = swatch.style.background;
                 const selected = state.layers.find(l => l.id === state.selectedLayerId);
                 
                 if (selected) {
                     selected.color = color;
-                    selected.gradient = gradient || null;
-                    if (color.startsWith('#')) {
-                        customColorPicker.value = color;
-                        customColorHex.value = color;
-                    }
+                    selected.gradient = hasGrad ? bgStyle : null;
                     renderCanvas();
                 }
             });
         });
 
-        // Custom color picker & hex input
-        customColorPicker.addEventListener('input', (e) => {
-            const color = e.target.value;
-            const selected = state.layers.find(l => l.id === state.selectedLayerId);
-            if (selected) {
-                selected.color = color;
-                selected.gradient = null;
-                customColorHex.value = color;
-                renderCanvas();
-            }
-        });
-
-        customColorHex.addEventListener('change', (e) => {
-            let val = e.target.value.trim();
-            if (!val.startsWith('#')) val = '#' + val;
-            if (/^#[0-9A-F]{6}$/i.test(val)) {
-                const selected = state.layers.find(l => l.id === state.selectedLayerId);
-                if (selected) {
-                    selected.color = val;
-                    selected.gradient = null;
-                    customColorPicker.value = val;
-                    renderCanvas();
-                }
-            }
-        });
-
-        // Alignment buttons
         alignButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 const align = btn.getAttribute('data-align');
@@ -757,146 +649,149 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Fine position sliders
-        posXRange.addEventListener('input', (e) => {
-            const selected = state.layers.find(l => l.id === state.selectedLayerId);
-            if (selected) {
-                selected.x = parseInt(e.target.value);
-                posXVal.textContent = selected.x;
-                renderCanvas();
-            }
-        });
-
-        posYRange.addEventListener('input', (e) => {
-            const selected = state.layers.find(l => l.id === state.selectedLayerId);
-            if (selected) {
-                selected.y = parseInt(e.target.value);
-                posYVal.textContent = selected.y;
-                renderCanvas();
-            }
-        });
-
-        // Add custom text button
         btnAddCustomText.addEventListener('click', addCustomTextLayer);
 
-        // Zoom Controls
+        // Zoom controls
         btnZoomIn.addEventListener('click', () => setZoom(state.zoomLevel + 0.15));
         btnZoomOut.addEventListener('click', () => setZoom(state.zoomLevel - 0.15));
-        btnZoomReset.addEventListener('click', () => setZoom(1.0));
+        if (btnZoomFit) btnZoomFit.addEventListener('click', autoFitZoom);
 
-        // Toggle guide line
         btnToggleGuide.addEventListener('click', () => {
             state.showGuides = !state.showGuides;
             btnToggleGuide.classList.toggle('active', state.showGuides);
-            showToast(state.showGuides ? "Lignes de guidage activées" : "Lignes de guidage désactivées");
         });
 
-        // Export menu dropdown toggle
         btnExportMenu.addEventListener('click', (e) => {
             e.stopPropagation();
             exportDropdownMenu.classList.toggle('show');
         });
-
-        document.addEventListener('click', () => {
-            exportDropdownMenu.classList.remove('show');
-        });
+        document.addEventListener('click', () => exportDropdownMenu.classList.remove('show'));
 
         btnExportPNG.addEventListener('click', () => triggerExport('png'));
         btnExportPDF.addEventListener('click', () => triggerExport('pdf'));
-
-        // Save & New Project
-        btnSaveProject.addEventListener('click', saveProject);
-        btnNewProject.addEventListener('click', () => {
-            if (confirm("Voulez-vous réinitialiser le projet à son état d'origine ?")) {
-                location.reload();
-            }
-        });
+        btnNewProject.addEventListener('click', () => location.reload());
     }
 
     function setZoom(lvl) {
-        state.zoomLevel = Math.max(0.5, Math.min(2.5, lvl));
-        canvasWrapper.style.transform = `scale(${state.zoomLevel})`;
+        state.zoomLevel = Math.max(0.35, Math.min(2.0, lvl));
+        zoomWrapper.style.transform = `scale(${state.zoomLevel})`;
         zoomPercent.textContent = `${Math.round(state.zoomLevel * 100)}%`;
     }
 
-    // --- High-Resolution Server-side Export & Direct PC Download ---
+    // --- Fullscreen Preview Render ---
+    function generateFullscreenPreview() {
+        if (!state.currentTemplate) return;
+
+        const canvas = fullscreenCanvas;
+        const ctx = canvas.getContext('2d');
+        const img = cardBgImage;
+
+        canvas.width = state.currentTemplate.width;
+        canvas.height = state.currentTemplate.height;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        state.layers.forEach(layer => {
+            if (!layer.text.trim()) return;
+
+            const fontSize = layer.fontSize;
+            ctx.font = `${fontSize}px '${layer.fontFamily}', serif`;
+            ctx.textAlign = layer.align;
+            ctx.textBaseline = 'top';
+
+            const x = (layer.pctX / 100.0) * canvas.width;
+            const y = (layer.pctY / 100.0) * canvas.height;
+
+            if (layer.gradient) {
+                const grad = ctx.createLinearGradient(x, y, x + 200, y + fontSize);
+                grad.addColorStop(0, '#bf953f');
+                grad.addColorStop(0.5, '#fcf6ba');
+                grad.addColorStop(1, '#aa771c');
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = layer.color;
+            }
+
+            const lines = layer.text.split('\n');
+            let curY = y;
+
+            lines.forEach(line => {
+                ctx.fillText(line, x, curY);
+                curY += fontSize * 1.3;
+            });
+        });
+
+        fullscreenModal.classList.add('show');
+    }
+
+    // --- Instant Direct Export ---
     async function triggerExport(format) {
         if (!state.currentTemplate) return;
 
-        showToast(`Génération de votre invitation ${format.toUpperCase()} en cours...`);
+        showToast(`Génération de votre invitation ${format.toUpperCase()}...`);
 
-        const payload = {
-            filename: state.currentTemplate.filename,
-            format: format,
-            layers: state.layers,
-            previewWidth: cardBgImage.clientWidth || 450,
-            previewHeight: cardBgImage.clientHeight || 750
-        };
+        // HTML5 Canvas Composition
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = cardBgImage;
 
-        try {
-            const response = await fetch('/api/export', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+        canvas.width = state.currentTemplate.width;
+        canvas.height = state.currentTemplate.height;
 
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || "Erreur lors de l'exportation");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        state.layers.forEach(layer => {
+            if (!layer.text.trim()) return;
+
+            ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
+            ctx.textAlign = layer.align;
+            ctx.textBaseline = 'top';
+
+            const x = (layer.pctX / 100.0) * canvas.width;
+            const y = (layer.pctY / 100.0) * canvas.height;
+
+            if (layer.gradient) {
+                const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
+                grad.addColorStop(0, '#bf953f');
+                grad.addColorStop(0.5, '#fcf6ba');
+                grad.addColorStop(1, '#aa771c');
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = layer.color;
             }
 
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = downloadUrl;
-            a.download = `RIWA_Invitation_Mariage_${Date.now()}.${format}`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(downloadUrl);
+            const lines = layer.text.split('\n');
+            let curY = y;
 
-            showToast(`Invitation ${format.toUpperCase()} téléchargée sur votre ordinateur ! 🎉`);
-        } catch (err) {
-            console.error("Export error:", err);
-            showToast(`Erreur: ${err.message}`);
-        }
-    }
-
-    // --- Save Project Local ---
-    async function saveProject() {
-        const titleInput = document.getElementById('projectTitleInput');
-        const payload = {
-            title: titleInput.value || 'Invitation_RIWA',
-            template: state.currentTemplate,
-            layers: state.layers,
-            updatedAt: new Date().toISOString()
-        };
-
-        try {
-            const response = await fetch('/api/save-project', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            lines.forEach(line => {
+                ctx.fillText(line, x, curY);
+                curY += layer.fontSize * 1.3;
             });
-            const data = await response.json();
-            if (data.success) {
-                showToast("Projet sauvegardé avec succès !");
-            }
-        } catch (err) {
-            console.error("Save error:", err);
-            showToast("Erreur lors de la sauvegarde.");
-        }
+        });
+
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        
+        // Clean meaningful filename
+        const namesLayer = state.layers.find(l => l.id === 'layer_names');
+        const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
+        const cleanFileName = `RIWA_Invitation_${namesSlug}.${format}`;
+
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = cleanFileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        showToast(`Invitation téléchargée : ${cleanFileName} ! 🎉`);
     }
 
-    // --- Toast Notifications ---
     function showToast(msg) {
         const toast = document.getElementById('riwaToast');
         const toastMessage = document.getElementById('toastMessage');
         toastMessage.textContent = msg;
         toast.classList.add('show');
 
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3200);
+        setTimeout(() => toast.classList.remove('show'), 3400);
     }
 });
