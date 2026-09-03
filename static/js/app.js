@@ -211,22 +211,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (btnCloseShareModal) btnCloseShareModal.addEventListener('click', () => shareModal.classList.remove('show'));
 
+        const shareUrl = window.location.href;
+        const shareText = "Découvrez mon invitation de mariage créée sur RIWA — « Un beau moment commence ici. »";
+
         const btnCopyPhotoPNG = document.getElementById('btnCopyPhotoPNG');
         if (btnCopyPhotoPNG) {
-            btnCopyPhotoPNG.addEventListener('click', () => copyOrShareImagePNG());
+            btnCopyPhotoPNG.addEventListener('click', () => triggerExport('png'));
         }
 
         if (btnShareWhatsapp) {
-            btnShareWhatsapp.addEventListener('click', () => copyOrShareImagePNG('whatsapp'));
+            btnShareWhatsapp.addEventListener('click', () => {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+                showToast("Ouverture de WhatsApp...");
+            });
         }
         if (btnShareMessenger) {
-            btnShareMessenger.addEventListener('click', () => copyOrShareImagePNG('messenger'));
+            btnShareMessenger.addEventListener('click', () => {
+                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
+                showToast("Ouverture de Messenger...");
+            });
         }
         if (btnShareInstagram) {
-            btnShareInstagram.addEventListener('click', () => copyOrShareImagePNG('instagram'));
+            btnShareInstagram.addEventListener('click', () => {
+                navigator.clipboard.writeText(shareUrl);
+                showToast("Lien d'invitation copié ! Prêt à être collé dans votre Story Instagram.");
+            });
         }
         if (btnCopyLink) {
-            btnCopyLink.addEventListener('click', () => copyOrShareImagePNG('copy'));
+            btnCopyLink.addEventListener('click', () => {
+                navigator.clipboard.writeText(shareUrl);
+                showToast("Lien d'invitation copié dans le presse-papier !");
+            });
         }
     }
 
