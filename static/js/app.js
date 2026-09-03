@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btnSharePhotoDirect = document.getElementById('btnSharePhotoDirect');
         if (btnSharePhotoDirect) {
-            btnSharePhotoDirect.addEventListener('click', () => shareAsPhotoPNG('direct'));
+            btnSharePhotoDirect.addEventListener('click', () => downloadOrSharePNGPhoto());
         }
 
         const shareUrl = window.location.href;
@@ -222,23 +222,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnShareWhatsapp) {
             btnShareWhatsapp.addEventListener('click', () => {
-                shareAsPhotoPNG('whatsapp');
-                setTimeout(() => {
-                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
-                }, 400);
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+                showToast("Ouverture de WhatsApp...");
             });
         }
         if (btnShareMessenger) {
             btnShareMessenger.addEventListener('click', () => {
-                shareAsPhotoPNG('messenger');
-                setTimeout(() => {
-                    window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
-                }, 400);
+                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
+                showToast("Ouverture de Messenger...");
             });
         }
         if (btnShareInstagram) {
             btnShareInstagram.addEventListener('click', () => {
-                shareAsPhotoPNG('instagram');
+                navigator.clipboard.writeText(shareUrl);
+                showToast("Lien d'invitation copié ! Prêt à coller sur Instagram.");
             });
         }
         if (btnCopyLink) {
@@ -296,8 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function shareAsPhotoPNG(platform = 'direct') {
+    async function downloadOrSharePNGPhoto() {
         if (!state.currentTemplate) return;
+
+        showToast("Génération de l'image PNG...");
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -342,15 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
         const fileName = `RIWA_Invitation_${namesSlug}.png`;
 
-        // Always auto-download PNG photo file to user device
-        const downloadLink = document.createElement('a');
-        downloadLink.href = dataUrl;
-        downloadLink.download = fileName;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        // Native Mobile File Share Sheet (iOS / Android)
+        // Native Mobile File Share Sheet (iOS / Android) if available
         try {
             const response = await fetch(dataUrl);
             const blob = await response.blob();
@@ -362,22 +353,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     text: 'Voici mon invitation de mariage créée sur RIWA ! 💍✨',
                     files: [file]
                 });
-                showToast("Photo d'invitation partagée avec succès ! 🎉");
+                showToast("Photo d'invitation partagée ! 🎉");
                 return;
             }
         } catch (err) {
             console.log("Web Share API fallback:", err);
         }
 
-        if (platform === 'messenger') {
-            showToast(`📸 Photo PNG enregistrée ! Envoyez l'image téléchargée dans votre conversation Messenger.`);
-        } else if (platform === 'whatsapp') {
-            showToast(`📸 Photo PNG enregistrée ! Envoyez l'image téléchargée sur WhatsApp.`);
-        } else if (platform === 'instagram') {
-            showToast(`📸 Photo PNG enregistrée dans vos images ! Prête pour votre Story Instagram.`);
-        } else {
-            showToast(`📸 Photo PNG enregistrée automatiquement dans vos téléchargements !`);
-        }
+        // Fallback: download single file explicitly
+        const downloadLink = document.createElement('a');
+        downloadLink.href = dataUrl;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
+        showToast(`📸 Photo PNG téléchargeé dans vos fichiers !`);
     }
 
     function setupTabs() {
