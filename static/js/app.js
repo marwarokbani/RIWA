@@ -206,19 +206,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnOpenShareModal) {
             btnOpenShareModal.addEventListener('click', () => {
-                renderSharePreviewThumbnail();
                 shareModal.classList.add('show');
             });
         }
         if (btnCloseShareModal) btnCloseShareModal.addEventListener('click', () => shareModal.classList.remove('show'));
 
-        const btnSharePhotoDirect = document.getElementById('btnSharePhotoDirect');
-        if (btnSharePhotoDirect) {
-            btnSharePhotoDirect.addEventListener('click', () => downloadOrSharePNGPhoto());
-        }
-
         const shareUrl = window.location.href;
         const shareText = "Découvrez mon invitation de mariage créée sur RIWA — « Un beau moment commence ici. »";
+
+        const btnShareNative = document.getElementById('btnShareNative');
+        if (btnShareNative) {
+            btnShareNative.addEventListener('click', async () => {
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Mon Invitation RIWA',
+                            text: shareText,
+                            url: shareUrl
+                        });
+                        showToast("Invitation partagée avec succès ! 🎉");
+                        return;
+                    } catch (err) {
+                        console.log("Native share cancelled or failed", err);
+                    }
+                }
+                navigator.clipboard.writeText(shareUrl);
+                showToast("Lien d'invitation copié dans le presse-papier !");
+            });
+        }
 
         if (btnShareWhatsapp) {
             btnShareWhatsapp.addEventListener('click', () => {
@@ -235,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnShareInstagram) {
             btnShareInstagram.addEventListener('click', () => {
                 navigator.clipboard.writeText(shareUrl);
-                showToast("Lien d'invitation copié ! Prêt à coller sur Instagram.");
+                showToast("Lien d'invitation copié ! Prêt à être collé dans votre Story Instagram.");
             });
         }
         if (btnCopyLink) {
@@ -244,131 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast("Lien d'invitation copié dans le presse-papier !");
             });
         }
-    }
-
-    function renderSharePreviewThumbnail() {
-        if (!state.currentTemplate) return;
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = cardBgImage;
-
-        canvas.width = state.currentTemplate.width;
-        canvas.height = state.currentTemplate.height;
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        state.layers.forEach(layer => {
-            if (!layer.text.trim()) return;
-
-            ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
-            ctx.textAlign = layer.align;
-            ctx.textBaseline = 'top';
-
-            const x = (layer.pctX / 100.0) * canvas.width;
-            const y = (layer.pctY / 100.0) * canvas.height;
-
-            if (layer.gradient) {
-                const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
-                grad.addColorStop(0, '#bf953f');
-                grad.addColorStop(0.5, '#fcf6ba');
-                grad.addColorStop(1, '#aa771c');
-                ctx.fillStyle = grad;
-            } else {
-                ctx.fillStyle = layer.color;
-            }
-
-            const lines = layer.text.split('\n');
-            let curY = y;
-
-            lines.forEach(line => {
-                ctx.fillText(line, x, curY);
-                curY += layer.fontSize * 1.3;
-            });
-        });
-
-        const sharePreviewImg = document.getElementById('sharePreviewImg');
-        if (sharePreviewImg) {
-            sharePreviewImg.src = canvas.toDataURL('image/png', 0.85);
-            sharePreviewImg.style.display = 'inline-block';
-        }
-    }
-
-    async function downloadOrSharePNGPhoto() {
-        if (!state.currentTemplate) return;
-
-        showToast("Génération de l'image PNG...");
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = cardBgImage;
-
-        canvas.width = state.currentTemplate.width;
-        canvas.height = state.currentTemplate.height;
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        state.layers.forEach(layer => {
-            if (!layer.text.trim()) return;
-
-            ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
-            ctx.textAlign = layer.align;
-            ctx.textBaseline = 'top';
-
-            const x = (layer.pctX / 100.0) * canvas.width;
-            const y = (layer.pctY / 100.0) * canvas.height;
-
-            if (layer.gradient) {
-                const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
-                grad.addColorStop(0, '#bf953f');
-                grad.addColorStop(0.5, '#fcf6ba');
-                grad.addColorStop(1, '#aa771c');
-                ctx.fillStyle = grad;
-            } else {
-                ctx.fillStyle = layer.color;
-            }
-
-            const lines = layer.text.split('\n');
-            let curY = y;
-
-            lines.forEach(line => {
-                ctx.fillText(line, x, curY);
-                curY += layer.fontSize * 1.3;
-            });
-        });
-
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-        const namesLayer = state.layers.find(l => l.id === 'layer_names');
-        const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
-        const fileName = `RIWA_Invitation_${namesSlug}.png`;
-
-        // Native Mobile File Share Sheet (iOS / Android) if available
-        try {
-            const response = await fetch(dataUrl);
-            const blob = await response.blob();
-            const file = new File([blob], fileName, { type: 'image/png' });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    title: 'Mon Invitation RIWA',
-                    text: 'Voici mon invitation de mariage créée sur RIWA ! 💍✨',
-                    files: [file]
-                });
-                showToast("Photo d'invitation partagée ! 🎉");
-                return;
-            }
-        } catch (err) {
-            console.log("Web Share API fallback:", err);
-        }
-
-        // Fallback: download single file explicitly
-        const downloadLink = document.createElement('a');
-        downloadLink.href = dataUrl;
-        downloadLink.download = fileName;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        showToast(`📸 Photo PNG téléchargeé dans vos fichiers !`);
     }
 
     function setupTabs() {
