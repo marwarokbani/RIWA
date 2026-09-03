@@ -21,19 +21,16 @@
     <!-- Header Navbar -->
     <header class="riwa-header">
         <div class="riwa-brand">
-            <!-- Highlighted Logo Container -->
-            <div class="riwa-logo-container" id="riwaLogoContainer" title="RIWA Studio">
+            <!-- Borderless Logo Container -->
+            <div class="riwa-logo-container" id="riwaLogoContainer" title="RIWA">
                 <img src="/Logo.png" alt="RIWA Logo" class="riwa-logo-img-lg" id="riwaLogo">
-            </div>
-            <div class="riwa-brand-text">
-                <span class="riwa-brand-sub">« Un beau moment commence ici. »</span>
             </div>
         </div>
 
         <div class="riwa-header-center">
             <div class="project-title-container">
                 <i class="fa-solid fa-pen-nib gold-icon"></i>
-                <input type="text" id="projectTitleInput" value="Mon Invitation de Mariage" placeholder="Titre de votre projet...">
+                <input type="text" id="projectTitleInput" value="Mon Invitation de Mariage" placeholder="Titre de votre projet RIWA...">
             </div>
         </div>
 
@@ -54,15 +51,17 @@
 
             <!-- Download Dropdown -->
             <div class="export-dropdown">
-                <button class="btn btn-gold" id="btnExportMenu">
+                <button class="btn btn-gold btn-download-main" id="btnExportMenu">
                     <i class="fa-solid fa-download"></i> Télécharger <i class="fa-solid fa-chevron-down ms-1"></i>
                 </button>
                 <div class="dropdown-menu" id="exportDropdownMenu">
                     <button class="dropdown-item" id="btnExportPNG">
-                        <i class="fa-regular fa-image text-gold"></i> Image PNG (Haute Définition)
+                        <i class="fa-regular fa-image text-gold"></i>
+                        <span>Image PNG (Haute Définition)</span>
                     </button>
                     <button class="dropdown-item" id="btnExportPDF">
-                        <i class="fa-regular fa-file-pdf text-gold"></i> Document PDF (Prêt à imprimer)
+                        <i class="fa-regular fa-file-pdf text-gold"></i>
+                        <span>Document PDF (Prêt à imprimer)</span>
                     </button>
                 </div>
             </div>
@@ -256,21 +255,19 @@
 
     </main>
 
-    <!-- Splash Screen -->
+    <!-- Splash Screen (Page de Garde) - Clean Borderless Logo & Single Phrase -->
     <div id="riwaSplashScreen" class="riwa-splash-screen">
         <div class="splash-content">
-            <div class="riwa-logo-container" style="padding:16px 28px; background: radial-gradient(circle, #ffffff 0%, #f7f1e3 100%);">
+            <div class="riwa-splash-logo-container">
                 <img src="/Logo.png" alt="RIWA Logo" class="splash-logo-img-lg">
             </div>
             
             <div class="splash-taglines">
                 <p class="splash-phrase">« Un beau moment commence ici. »</p>
-                <p class="splash-phrase">« Un moment à célébrer. Une histoire à partager. »</p>
-                <p class="splash-phrase">« À partager avec ceux qui comptent. »</p>
             </div>
 
             <button class="btn btn-splash-enter" id="btnEnterStudio">
-                ✦ CONCEVOIR MON INVITATION SUR-MESURE ✦
+                ✦ CRÉER MON INVITATION RIWA ✦
             </button>
         </div>
     </div>

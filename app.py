@@ -172,5 +172,6 @@ def save_project():
     return jsonify({'success': True, 'message': 'Projet sauvegardé avec succès'})
 
 if __name__ == '__main__':
-    print("Démarrage du serveur RIWA Invitations (Accès Direct Sans Connexion) sur http://127.0.0.1:5000")
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"Démarrage du serveur RIWA Invitations sur http://0.0.0.0:{port}")
+    app.run(host='0.0.0.0', port=port, debug=False)

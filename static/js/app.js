@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnEnterStudio) {
             btnEnterStudio.addEventListener('click', () => {
                 riwaSplashScreen.classList.add('hide');
-                showToast("Bienvenue dans RIWA Studio !");
+                showToast("Bienvenue sur RIWA !");
             });
         }
     }
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnCloseShareModal) btnCloseShareModal.addEventListener('click', () => shareModal.classList.remove('show'));
 
         const shareUrl = window.location.href;
-        const shareText = "Découvrez mon invitation de mariage créée sur RIWA Studio — « Un beau moment commence ici. »";
+        const shareText = "Découvrez mon invitation de mariage créée sur RIWA — « Un beau moment commence ici. »";
 
         if (btnShareWhatsapp) {
             btnShareWhatsapp.addEventListener('click', () => {

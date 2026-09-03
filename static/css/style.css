@@ -3,28 +3,28 @@
    ========================================================================== */
 
 :root {
-    --bg-dark: #f3e8d5;
-    --bg-card: #fffaf0;
-    --bg-glass: rgba(255, 250, 240, 0.9);
-    --border-gold: rgba(212, 175, 55, 0.35);
-    --border-gold-bright: rgba(212, 175, 55, 0.85);
+    --bg-dark: #f0e4d2;
+    --bg-card: #fffdf9;
+    --bg-glass: rgba(255, 252, 246, 0.94);
+    --border-gold: rgba(212, 175, 55, 0.4);
+    --border-gold-bright: rgba(212, 175, 55, 0.9);
     
-    --gold-primary: #d4af37;
+    --gold-primary: #c59b27;
     --gold-light: #f4e098;
-    --gold-dark: #aa8210;
+    --gold-dark: #8a670f;
     --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
     --rosegold-gradient: linear-gradient(135deg, #e0a96d 0%, #f9d5bb 30%, #c47b59 70%, #8c4c36 100%);
     --champagne-gradient: linear-gradient(135deg, #fff6e5 0%, #f3dcb1 50%, #e0be84 100%);
     
-    --text-main: #3d3024;
-    --text-muted: #806f5c;
+    --text-main: #2b2019;
+    --text-muted: #685646;
     
     --font-ui: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-serif: 'Playfair Display', serif;
     --font-royal: 'Cinzel', serif;
     
     --shadow-gold: 0 4px 25px rgba(212, 175, 55, 0.35);
-    --shadow-card: 0 16px 50px rgba(104, 75, 39, 0.22);
+    --shadow-card: 0 16px 50px rgba(80, 55, 25, 0.22);
     
     --sidebar-width: 380px;
     --header-height: 76px;
@@ -86,15 +86,15 @@ body.riwa-dark-theme {
 }
 
 .btn-glass {
-    background: rgba(255, 255, 255, 0.58);
+    background: rgba(255, 255, 255, 0.75);
     color: var(--text-main);
-    border: 1px solid rgba(126, 91, 48, 0.2);
+    border: 1px solid rgba(184, 134, 11, 0.3);
     backdrop-filter: blur(8px);
 }
 .btn-glass:hover {
-    background: rgba(212, 175, 55, 0.18);
+    background: rgba(212, 175, 55, 0.2);
     border-color: var(--border-gold-bright);
-    color: var(--gold-light);
+    color: #1a1204;
 }
 
 .btn-gold {
@@ -110,9 +110,10 @@ body.riwa-dark-theme {
 }
 
 .btn-outline-gold {
-    background: transparent;
-    color: var(--gold-primary);
-    border: 1px dashed var(--border-gold-bright);
+    background: #ffffff;
+    color: #8b670f;
+    border: 1.5px dashed var(--border-gold-bright);
+    font-weight: 700;
 }
 .btn-outline-gold:hover {
     background: rgba(212, 175, 55, 0.15);
@@ -122,29 +123,30 @@ body.riwa-dark-theme {
 /* Spectacular Splash Screen Enter Button */
 .btn-splash-enter {
     font-family: var(--font-royal) !important;
-    font-size: 1.15rem !important;
+    font-size: 1.12rem !important;
     font-weight: 700 !important;
-    letter-spacing: 2px !important;
-    padding: 16px 36px !important;
-    border-radius: 30px !important;
-    background: var(--gold-gradient) !important;
-    color: #120e03 !important;
-    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5), 0 0 15px rgba(255, 246, 186, 0.6) !important;
-    border: 1px solid #fff6ba !important;
+    letter-spacing: 3px !important;
+    padding: 18px 44px !important;
+    border-radius: 50px !important;
+    background: linear-gradient(135deg, #d4af37 0%, #fff6ba 25%, #b8860b 60%, #e5c158 100%) !important;
+    background-size: 200% auto !important;
+    color: #1a1204 !important;
+    box-shadow: 0 10px 35px rgba(184, 134, 11, 0.45), 0 0 25px rgba(255, 255, 255, 0.8) !important;
+    border: 2px solid #ffffff !important;
     cursor: pointer;
     transition: all 0.35s ease !important;
     text-transform: uppercase;
-    animation: goldPulse 2.5s infinite alternate;
+    animation: goldPulse 3s infinite alternate;
 }
 .btn-splash-enter:hover {
-    transform: scale(1.05) translateY(-2px) !important;
-    box-shadow: 0 12px 40px rgba(212, 175, 55, 0.75), 0 0 25px rgba(255, 255, 255, 0.8) !important;
-    filter: brightness(1.12) !important;
+    transform: scale(1.05) translateY(-3px) !important;
+    box-shadow: 0 16px 45px rgba(184, 134, 11, 0.65), 0 0 35px rgba(255, 255, 255, 1) !important;
+    background-position: right center !important;
 }
 
 @keyframes goldPulse {
     0% { box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4); }
-    100% { box-shadow: 0 12px 35px rgba(212, 175, 55, 0.7), 0 0 20px rgba(252, 246, 186, 0.5); }
+    100% { box-shadow: 0 14px 40px rgba(212, 175, 55, 0.75), 0 0 25px rgba(255, 255, 255, 0.9); }
 }
 
 .w-100 { width: 100%; }
@@ -170,21 +172,24 @@ body.riwa-dark-theme {
     flex-shrink: 0;
 }
 
-.riwa-logo-container {
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.98) 0%, rgba(245, 235, 215, 0.92) 100%);
-    padding: 6px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--border-gold-bright);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+/* Borderless Clean Logo Container (Sans Cadre) */
+.riwa-logo-container,
+.riwa-splash-logo-container {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .riwa-logo-img-lg {
-    height: 48px;
+    height: 52px;
     width: auto;
     object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(184, 134, 11, 0.25));
 }
 
 .riwa-brand-text {
@@ -194,7 +199,7 @@ body.riwa-dark-theme {
 
 .riwa-brand-sub {
     font-size: 0.82rem;
-    color: var(--gold-light);
+    color: var(--gold-dark);
     letter-spacing: 0.8px;
     font-style: italic;
     font-family: var(--font-serif);
@@ -646,14 +651,108 @@ body.riwa-dark-theme {
     color: var(--text-muted);
 }
 
-/* Splash Screen Overlay - MAGNIFICENT ENLARGED LOGO & PRO BUTTON */
+/* Download Dropdown Styling - Ultra Luxurious & Sleek */
+.export-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-download-main {
+    background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%) !important;
+    color: #1a1405 !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    padding: 10px 20px !important;
+    border-radius: 30px !important;
+    box-shadow: 0 4px 20px rgba(184, 134, 11, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    transition: all 0.3s ease !important;
+}
+.btn-download-main:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 30px rgba(184, 134, 11, 0.55), 0 0 15px rgba(255, 246, 186, 0.7) !important;
+    filter: brightness(1.08) !important;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 290px;
+    background: rgba(255, 253, 247, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(212, 175, 55, 0.7);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 16px 45px rgba(60, 45, 20, 0.25), 0 0 20px rgba(212, 175, 55, 0.15);
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: dropdownSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 13px 18px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    color: #2c221e;
+    font-family: var(--font-ui);
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.dropdown-item i {
+    font-size: 1.2rem;
+    color: #b8860b;
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(254, 243, 199, 0.5) 100%);
+    border-color: rgba(212, 175, 55, 0.85);
+    color: #1a1204;
+    transform: translateX(5px);
+    box-shadow: 0 6px 18px rgba(184, 134, 11, 0.25);
+}
+
+.dropdown-item:hover i {
+    transform: scale(1.25) rotate(-5deg);
+    color: #d4af37;
+}
+
+/* Splash Screen Overlay (Page de Garde) - Borderless Floating Logo & Single Phrase */
 .riwa-splash-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: radial-gradient(circle at center, #fffaf0 0%, #e7d2ae 100%);
+    background: radial-gradient(circle at center, #fffdf8 0%, #f4e7d3 60%, #e2ceae 100%);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -667,46 +766,48 @@ body.riwa-dark-theme {
 }
 
 .splash-content {
-    max-width: 720px;
+    max-width: 680px;
     width: 92%;
     text-align: center;
-    background: rgba(255, 250, 240, 0.94);
+    background: rgba(255, 253, 247, 0.95);
     border: 1px solid var(--border-gold-bright);
-    box-shadow: 0 20px 70px rgba(104, 75, 39, 0.28), 0 0 30px rgba(212, 175, 55, 0.25);
+    box-shadow: 0 20px 70px rgba(80, 55, 25, 0.25), 0 0 35px rgba(212, 175, 55, 0.2);
     backdrop-filter: blur(24px);
-    border-radius: 24px;
-    padding: 48px 40px;
+    border-radius: 28px;
+    padding: 46px 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 22px;
+    gap: 24px;
 }
 
-/* Extremely Large & Crisp Splash Logo */
+/* Crisp Floating Logo Without Any Frame/Cadre */
 .splash-logo-img-lg {
-    height: 280px !important;
-    max-height: 38vh;
+    height: 250px !important;
+    max-height: 35vh;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 8px 25px rgba(212, 175, 55, 0.6));
-    transition: transform 0.3s ease;
+    filter: drop-shadow(0 8px 25px rgba(184, 134, 11, 0.28));
+    transition: transform 0.35s ease;
 }
 .splash-logo-img-lg:hover {
-    transform: scale(1.04);
+    transform: scale(1.05);
 }
 
 .splash-taglines {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin: 8px 0 12px 0;
+    align-items: center;
+    margin: 4px 0 10px 0;
 }
 .splash-phrase {
     font-family: var(--font-serif);
-    font-size: 1.15rem;
-    color: var(--gold-light);
+    font-size: 1.35rem;
+    color: #8b6814;
     font-style: italic;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 /* Modals */
