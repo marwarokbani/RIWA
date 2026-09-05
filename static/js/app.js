@@ -938,111 +938,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Fullscreen Preview Render ---
-    function generateFullscreenPreview() {
+    async function generateFullscreenPreview() {
         if (!state.currentTemplate) return;
 
-        const canvas = fullscreenCanvas;
-        const ctx = canvas.getContext('2d');
-        const img = cardBgImage;
+        showToast("Génération de l'aperçu plein écran...");
 
-        canvas.width = state.currentTemplate.width;
-        canvas.height = state.currentTemplate.height;
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        state.layers.forEach(layer => {
-            if (!layer.text.trim()) return;
-
-            const fontSize = layer.fontSize;
-            ctx.font = `${fontSize}px '${layer.fontFamily}', serif`;
-            ctx.textAlign = layer.align;
-            ctx.textBaseline = 'top';
-
-            const x = (layer.pctX / 100.0) * canvas.width;
-            const y = (layer.pctY / 100.0) * canvas.height;
-
-            if (layer.gradient) {
-                const grad = ctx.createLinearGradient(x, y, x + 200, y + fontSize);
-                grad.addColorStop(0, '#bf953f');
-                grad.addColorStop(0.5, '#fcf6ba');
-                grad.addColorStop(1, '#aa771c');
-                ctx.fillStyle = grad;
-            } else {
-                ctx.fillStyle = layer.color;
-            }
-
-            const lines = layer.text.split('\n');
-            let curY = y;
-
-            lines.forEach(line => {
-                ctx.fillText(line, x, curY);
-                curY += fontSize * 1.3;
+        try {
+            const res = await fetch('/api/share-card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: state.currentTemplate.filename,
+                    layers: state.layers,
+                    previewWidth: cardBgImage.clientWidth || 800,
+                    previewHeight: cardBgImage.clientHeight || 1200
+                })
             });
-        });
 
-        fullscreenModal.classList.add('show');
+            const json = await res.json();
+            if (json.success && json.image_url) {
+                const img = new Image();
+                img.onload = () => {
+                    fullscreenCanvas.width = img.width;
+                    fullscreenCanvas.height = img.height;
+                    const ctx = fullscreenCanvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    fullscreenModal.classList.add('show');
+                };
+                img.src = json.image_url;
+            }
+        } catch (err) {
+            console.error("Fullscreen preview error:", err);
+            showToast("Erreur lors de l'affichage plein écran.");
+        }
     }
 
-    // --- Instant Direct Export ---
+    // --- High Definition Export (PNG & PDF) ---
     async function triggerExport(format) {
         if (!state.currentTemplate) return;
 
         showToast(`Génération de votre invitation ${format.toUpperCase()}...`);
 
-        // HTML5 Canvas Composition
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = cardBgImage;
-
-        canvas.width = state.currentTemplate.width;
-        canvas.height = state.currentTemplate.height;
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        state.layers.forEach(layer => {
-            if (!layer.text.trim()) return;
-
-            ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
-            ctx.textAlign = layer.align;
-            ctx.textBaseline = 'top';
-
-            const x = (layer.pctX / 100.0) * canvas.width;
-            const y = (layer.pctY / 100.0) * canvas.height;
-
-            if (layer.gradient) {
-                const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
-                grad.addColorStop(0, '#bf953f');
-                grad.addColorStop(0.5, '#fcf6ba');
-                grad.addColorStop(1, '#aa771c');
-                ctx.fillStyle = grad;
-            } else {
-                ctx.fillStyle = layer.color;
-            }
-
-            const lines = layer.text.split('\n');
-            let curY = y;
-
-            lines.forEach(line => {
-                ctx.fillText(line, x, curY);
-                curY += layer.fontSize * 1.3;
+        try {
+            const res = await fetch('/api/export', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: state.currentTemplate.filename,
+                    format: format,
+                    layers: state.layers,
+                    previewWidth: cardBgImage.clientWidth || 800,
+                    previewHeight: cardBgImage.clientHeight || 1200
+                })
             });
-        });
 
-        const dataUrl = canvas.toDataURL('image/png', 1.0);
-        
-        // Clean meaningful filename
-        const namesLayer = state.layers.find(l => l.id === 'layer_names');
-        const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
-        const cleanFileName = `RIWA_Invitation_${namesSlug}.${format}`;
+            if (!res.ok) throw new Error("Erreur serveur lors de l'exportation");
 
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = cleanFileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+            const blob = await res.blob();
+            const downloadUrl = URL.createObjectURL(blob);
+            
+            const namesLayer = state.layers.find(l => l.id === 'layer_names');
+            const namesSlug = namesLayer ? namesLayer.text.replace(/[^a-zA-Z0-9]/g, '_') : 'Mariage';
+            const cleanFileName = `RIWA_Invitation_${namesSlug}.${format}`;
 
-        showToast(`Invitation téléchargée : ${cleanFileName} ! 🎉`);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = cleanFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+
+            showToast(`Invitation téléchargée : ${cleanFileName} ! 🎉`);
+        } catch (err) {
+            console.error("Export error:", err);
+            showToast("Erreur lors du téléchargement de l'invitation.");
+        }
     }
 
     function showToast(msg) {

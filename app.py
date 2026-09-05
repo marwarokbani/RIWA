@@ -74,8 +74,44 @@ def view_shared_card(card_id):
                            title="Invitation de Mariage - RIWA",
                            description="« Un beau moment commence ici. » Découvrez cette magnifique invitation personnalisée.")
 
+def create_gradient_image(width, height, grad_type):
+    """Generate linear gradient image for Pillow text masking."""
+    base = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(base)
+    
+    colors = [
+        (191, 149, 63), (252, 246, 186), (179, 135, 40), (251, 245, 183), (170, 119, 28)
+    ]
+    if 'rosegold' in grad_type:
+        colors = [(224, 169, 109), (249, 213, 187), (196, 123, 89), (140, 76, 54)]
+    elif 'champagne' in grad_type:
+        colors = [(255, 246, 229), (243, 220, 177), (224, 190, 132)]
+    elif 'bronze' in grad_type:
+        colors = [(108, 79, 35), (168, 129, 66), (74, 53, 5)]
+    elif 'royalpurple' in grad_type:
+        colors = [(75, 0, 130), (138, 43, 226)]
+    elif 'silver' in grad_type:
+        colors = [(230, 233, 240), (238, 241, 245), (128, 136, 150)]
+
+    num_colors = len(colors)
+    for y in range(height):
+        t = y / float(height) if height > 1 else 0.5
+        idx = min(int(t * (num_colors - 1)), num_colors - 2)
+        local_t = (t * (num_colors - 1)) - idx
+        
+        c1 = colors[idx]
+        c2 = colors[idx + 1]
+        
+        r = int(c1[0] + (c2[0] - c1[0]) * local_t)
+        g = int(c1[1] + (c2[1] - c1[1]) * local_t)
+        b = int(c1[2] + (c2[2] - c1[2]) * local_t)
+        
+        draw.line([(0, y), (width, y)], fill=(r, g, b, 255))
+        
+    return base
+
 def render_card_pillow(filename, layers, preview_width=800, preview_height=1200):
-    """Render card composite image on server side using Pillow."""
+    """Render card composite image on server side using Pillow with full gradient and font size accuracy."""
     card_path = os.path.join(CARDS_DIR, filename)
     if not os.path.exists(card_path):
         raise FileNotFoundError(f"Fichier {filename} non trouvé")
@@ -83,11 +119,12 @@ def render_card_pillow(filename, layers, preview_width=800, preview_height=1200)
     base_img = Image.open(card_path).convert('RGBA')
     orig_w, orig_h = base_img.size
     
-    scale_x = orig_w / float(preview_width or 800)
-    scale_y = orig_h / float(preview_height or 1200)
+    p_w = float(preview_width or 800)
+    p_h = float(preview_height or 1200)
+    
+    scale_y = orig_h / p_h
 
-    txt_layer = Image.new('RGBA', base_img.size, (255, 255, 255, 0))
-    draw = ImageDraw.Draw(txt_layer)
+    composite = base_img.copy()
 
     for layer in layers:
         content = str(layer.get('text', '')).strip()
@@ -103,6 +140,7 @@ def render_card_pillow(filename, layers, preview_width=800, preview_height=1200)
         font_size = max(14, int(float(layer.get('fontSize', 24)) * scale_y))
         font_family = layer.get('fontFamily', 'Playfair Display')
         color_hex = layer.get('color', '#d4af37')
+        gradient = layer.get('gradient')
         align = layer.get('align', 'center')
 
         try:
@@ -116,9 +154,13 @@ def render_card_pillow(filename, layers, preview_width=800, preview_height=1200)
         font = get_font(font_family, font_size)
         lines = content.split('\n')
 
+        # Draw onto transparent layer
+        mask_img = Image.new('L', base_img.size, 0)
+        draw_mask = ImageDraw.Draw(mask_img)
+
         line_dims = []
         for line in lines:
-            bbox = draw.textbbox((0, 0), line, font=font)
+            bbox = draw_mask.textbbox((0, 0), line, font=font)
             lw = bbox[2] - bbox[0]
             lh = bbox[3] - bbox[1]
             line_dims.append((lw, lh))
@@ -131,11 +173,24 @@ def render_card_pillow(filename, layers, preview_width=800, preview_height=1200)
             elif align == 'right':
                 cur_x = x - lw
 
-            draw.text((cur_x, cur_y), line, font=font, fill=rgb_color + (255,))
+            draw_mask.text((cur_x, cur_y), line, font=font, fill=255)
             cur_y += lh * 1.3
 
-    composite = Image.alpha_composite(base_img, txt_layer).convert('RGB')
-    return composite
+        if gradient:
+            grad_type = 'gold'
+            if 'rosegold' in str(gradient): grad_type = 'rosegold'
+            elif 'champagne' in str(gradient): grad_type = 'champagne'
+            elif 'bronze' in str(gradient): grad_type = 'bronze'
+            elif 'royalpurple' in str(gradient): grad_type = 'royalpurple'
+            elif 'silver' in str(gradient): grad_type = 'silver'
+            
+            grad_layer = create_gradient_image(orig_w, orig_h, grad_type)
+            composite.paste(grad_layer, (0, 0), mask_img)
+        else:
+            solid_layer = Image.new('RGBA', base_img.size, rgb_color + (255,))
+            composite.paste(solid_layer, (0, 0), mask_img)
+
+    return composite.convert('RGB')
 
 @app.route('/api/share-card', methods=['POST'])
 def share_card():
