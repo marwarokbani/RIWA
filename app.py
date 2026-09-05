@@ -133,8 +133,30 @@ def create_gradient_image(width, height, grad_type):
         
     return base
 
+def text_wrap_pillow(content, font, draw, max_width):
+    """Auto-wrap long text lines to match CSS max-width in browser stage editor."""
+    final_lines = []
+    raw_lines = content.split('\n')
+    for raw in raw_lines:
+        words = raw.split(' ')
+        if not words or not raw.strip():
+            final_lines.append(raw)
+            continue
+            
+        current = words[0]
+        for w in words[1:]:
+            test = current + ' ' + w
+            bbox = draw.textbbox((0, 0), test, font=font)
+            if (bbox[2] - bbox[0]) <= max_width:
+                current = test
+            else:
+                final_lines.append(current)
+                current = w
+        final_lines.append(current)
+    return final_lines
+
 def render_card_pillow(filename, layers, preview_width=800, preview_height=1200):
-    """Render card composite image on server side using Pillow with full gradient and font size accuracy."""
+    """Render card composite image on server side using Pillow with full gradient, font size, and text-wrapping accuracy."""
     card_path = os.path.join(CARDS_DIR, filename)
     if not os.path.exists(card_path):
         raise FileNotFoundError(f"Fichier {filename} non trouvé")
@@ -189,20 +211,26 @@ def render_card_pillow(filename, layers, preview_width=800, preview_height=1200)
             rgb_color = (212, 175, 55)
             
         font = get_font(font_family, font_size)
-        lines = content.split('\n')
 
         # Draw onto transparent layer
         mask_img = Image.new('L', base_img.size, 0)
         draw_mask = ImageDraw.Draw(mask_img)
 
+        # Auto wrap long lines matching 78% CSS max-width container
+        max_text_width = orig_w * 0.78
+        lines = text_wrap_pillow(content, font, draw_mask, max_text_width)
+
         line_dims = []
+        total_text_height = 0
         for line in lines:
             bbox = draw_mask.textbbox((0, 0), line, font=font)
             lw = bbox[2] - bbox[0]
             lh = bbox[3] - bbox[1]
             line_dims.append((lw, lh))
+            total_text_height += lh * 1.3
 
-        cur_y = y
+        # Center vertically around y (pctY%) matching CSS transform translate(-50%, -50%)
+        cur_y = y - (total_text_height / 2.0)
         for line, (lw, lh) in zip(lines, line_dims):
             cur_x = x
             if align == 'center':
