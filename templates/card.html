@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+
+    <!-- Dynamic Open Graph / Facebook & Messenger Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ page_url }}">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:image" content="{{ image_url }}">
+    <meta property="og:image:secure_url" content="{{ image_url }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="800">
+    <meta property="og:image:height" content="1200">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title }}">
+    <meta name="twitter:description" content="{{ description }}">
+    <meta name="twitter:image" content="{{ image_url }}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .shared-card-container {
+            max-width: 620px;
+            width: 100%;
+            background: rgba(22, 25, 35, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 20px;
+            padding: 28px 24px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.15);
+            text-align: center;
+            backdrop-filter: blur(12px);
+        }
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .brand-header img {
+            height: 48px;
+            width: auto;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+        }
+        .card-preview-box {
+            position: relative;
+            margin: 20px auto;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            background: #111;
+        }
+        .card-preview-box img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+        }
+        .shared-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 24px;
+        }
+        @media (min-width: 480px) {
+            .shared-actions {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+        .btn-shared-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-download-img {
+            background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+            color: #111;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        .btn-download-img:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+            color: #000;
+        }
+        .btn-create-own {
+            background: rgba(255, 255, 255, 0.08);
+            color: #f1f1f1;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+        }
+        .btn-create-own:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: #d4af37;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="shared-card-container">
+        <div class="brand-header">
+            <img src="/Logo.png" alt="RIWA Logo">
+        </div>
+
+        <h2 style="font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 6px; font-size: 1.5rem;">
+            Invitation Digitales Sur-Mesure
+        </h2>
+        <p style="color: #a0a0a0; font-size: 0.9rem; margin-bottom: 20px;">
+            « Un beau moment commence ici. »
+        </p>
+
+        {% if card_exists %}
+        <div class="card-preview-box">
+            <img src="{{ image_url }}" alt="Invitation Personnalisée RIWA">
+        </div>
+
+        <div class="shared-actions">
+            <a href="{{ image_url }}" download="RIWA_Invitation.png" class="btn-shared-action btn-download-img">
+                <i class="fa-solid fa-download"></i> Télécharger la Photo PNG
+            </a>
+            <a href="/" class="btn-shared-action btn-create-own">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Créer Mon Invitation RIWA
+            </a>
+        </div>
+        {% else %}
+        <div style="padding: 30px; color: #aaa;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 2.5rem; color: #d4af37; margin-bottom: 12px;"></i>
+            <p>Cette carte d'invitation n'est plus disponible ou a été déplacée.</p>
+            <a href="/" class="btn-shared-action btn-download-img" style="margin-top: 16px;">
+                Créer une nouvelle invitation
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -11,8 +11,10 @@ app.secret_key = 'riwa_studio_direct_access_key'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CARDS_DIR = os.path.join(BASE_DIR, 'Cards')
 SAVED_DIR = os.path.join(BASE_DIR, 'saved_projects')
+UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
 
 os.makedirs(SAVED_DIR, exist_ok=True)
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 def get_font(font_name, size):
     """Fallback font loader using system TrueType fonts."""
@@ -35,9 +37,73 @@ def index():
 def serve_card(filename):
     return send_from_directory(CARDS_DIR, filename)
 
+@app.route('/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory(UPLOADS_DIR, filename)
+
 @app.route('/Logo.png')
 def serve_logo():
     return send_from_directory(BASE_DIR, 'Logo.png')
+
+@app.route('/card/<card_id>')
+def view_shared_card(card_id):
+    """Serve dynamic HTML page with OpenGraph tags pointing to custom PNG image for Messenger/WhatsApp previews."""
+    clean_id = re.sub(r'[^a-zA-Z0-9_-]', '', card_id)
+    image_filename = f"card_{clean_id}.png"
+    image_path = os.path.join(UPLOADS_DIR, image_filename)
+    
+    # Base URL for metadata (uses request.host_url e.g. https://riwa-krtd.onrender.com/)
+    host_url = request.host_url.rstrip('/')
+    image_url = f"{host_url}/uploads/{image_filename}"
+    page_url = f"{host_url}/card/{clean_id}"
+    
+    card_exists = os.path.exists(image_path)
+    
+    return render_template('card.html',
+                           card_id=clean_id,
+                           card_exists=card_exists,
+                           image_url=image_url,
+                           page_url=page_url,
+                           title="Invitation de Mariage - RIWA",
+                           description="« Un beau moment commence ici. » Découvrez cette magnifique invitation créée sur-mesure.")
+
+@app.route('/api/share-card', methods=['POST'])
+def share_card():
+    """Receive base64 PNG card image from frontend, save to uploads, and return dynamic share URL."""
+    try:
+        import base64
+        import uuid
+        
+        data = request.get_json()
+        if not data or 'image' not in data:
+            return jsonify({'error': 'Image base64 manquante'}), 400
+        
+        img_data_str = data['image']
+        if ',' in img_data_str:
+            img_data_str = img_data_str.split(',')[1]
+            
+        img_bytes = base64.b64decode(img_data_str)
+        
+        card_id = uuid.uuid4().hex[:10]
+        filename = f"card_{card_id}.png"
+        filepath = os.path.join(UPLOADS_DIR, filename)
+        
+        with open(filepath, 'wb') as f:
+            f.write(img_bytes)
+            
+        host_url = request.host_url.rstrip('/')
+        share_url = f"{host_url}/card/{card_id}"
+        image_url = f"{host_url}/uploads/{filename}"
+        
+        return jsonify({
+            'success': True,
+            'card_id': card_id,
+            'share_url': share_url,
+            'image_url': image_url
+        })
+    except Exception as e:
+        print("Share card error:", e)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/templates', methods=['GET'])
 def get_templates():

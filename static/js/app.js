@@ -220,29 +220,103 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (btnShareWhatsapp) {
-            btnShareWhatsapp.addEventListener('click', () => {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+            btnShareWhatsapp.addEventListener('click', async () => {
+                showToast("Préparation de votre invitation...");
+                const dynamicUrl = await generateDynamicShareCardUrl();
+                const shareText = "Découvrez mon invitation de mariage créée sur RIWA — « Un beau moment commence ici. »";
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + dynamicUrl)}`, '_blank');
                 showToast("Ouverture de WhatsApp...");
             });
         }
         if (btnShareMessenger) {
-            btnShareMessenger.addEventListener('click', () => {
-                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(shareUrl)}`, '_blank');
+            btnShareMessenger.addEventListener('click', async () => {
+                showToast("Préparation de la carte pour Messenger...");
+                const dynamicUrl = await generateDynamicShareCardUrl();
+                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(dynamicUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(dynamicUrl)}`, '_blank');
                 showToast("Ouverture de Messenger...");
             });
         }
         if (btnShareInstagram) {
-            btnShareInstagram.addEventListener('click', () => {
-                navigator.clipboard.writeText(shareUrl);
+            btnShareInstagram.addEventListener('click', async () => {
+                showToast("Préparation de votre lien d'invitation...");
+                const dynamicUrl = await generateDynamicShareCardUrl();
+                try {
+                    await navigator.clipboard.writeText(dynamicUrl);
+                } catch (e) {}
                 showToast("Lien d'invitation copié ! Prêt à être collé dans votre Story Instagram.");
             });
         }
         if (btnCopyLink) {
-            btnCopyLink.addEventListener('click', () => {
-                navigator.clipboard.writeText(shareUrl);
-                showToast("Lien d'invitation copié dans le presse-papier !");
+            btnCopyLink.addEventListener('click', async () => {
+                showToast("Génération du lien unique...");
+                const dynamicUrl = await generateDynamicShareCardUrl();
+                try {
+                    await navigator.clipboard.writeText(dynamicUrl);
+                } catch (e) {}
+                showToast("Lien de votre carte d'invitation copié !");
             });
         }
+    }
+
+    async function generateDynamicShareCardUrl() {
+        if (!state.currentTemplate) return window.location.href;
+
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = cardBgImage;
+
+            canvas.width = state.currentTemplate.width;
+            canvas.height = state.currentTemplate.height;
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            state.layers.forEach(layer => {
+                if (!layer.text.trim()) return;
+
+                ctx.font = `${layer.fontSize}px '${layer.fontFamily}', serif`;
+                ctx.textAlign = layer.align;
+                ctx.textBaseline = 'top';
+
+                const x = (layer.pctX / 100.0) * canvas.width;
+                const y = (layer.pctY / 100.0) * canvas.height;
+
+                if (layer.gradient) {
+                    const grad = ctx.createLinearGradient(x, y, x + 200, y + layer.fontSize);
+                    grad.addColorStop(0, '#bf953f');
+                    grad.addColorStop(0.5, '#fcf6ba');
+                    grad.addColorStop(1, '#aa771c');
+                    ctx.fillStyle = grad;
+                } else {
+                    ctx.fillStyle = layer.color;
+                }
+
+                const lines = layer.text.split('\n');
+                let curY = y;
+
+                lines.forEach(line => {
+                    ctx.fillText(line, x, curY);
+                    curY += layer.fontSize * 1.3;
+                });
+            });
+
+            const dataUrl = canvas.toDataURL('image/png', 0.95);
+
+            const res = await fetch('/api/share-card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataUrl })
+            });
+
+            const json = await res.json();
+            if (json.success && json.share_url) {
+                return json.share_url;
+            }
+        } catch (err) {
+            console.error("Dynamic card generation error:", err);
+        }
+
+        return window.location.href;
     }
 
     async function copyOrShareImagePNG(platform = 'direct') {
