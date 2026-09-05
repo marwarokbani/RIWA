@@ -16,13 +16,36 @@ UPLOADS_DIR = os.path.join(BASE_DIR, 'uploads')
 os.makedirs(SAVED_DIR, exist_ok=True)
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
+FONTS_DIR = os.path.join(BASE_DIR, 'fonts')
+
 def get_font(font_name, size):
-    """Fallback font loader using system TrueType fonts."""
-    clean_name = font_name.split(',')[0].strip().replace("'", "").replace('"', "")
-    system_fonts = [
-        "georgia.ttf", "arial.ttf", "times.ttf", "calibri.ttf", "verdana.ttf"
-    ]
-    for sf in system_fonts:
+    """Load Google TTF font from fonts directory or fallback to system font."""
+    clean_name = font_name.split(',')[0].replace("'", "").replace('"', "").strip()
+    
+    font_map = {
+        'great vibes': 'GreatVibes.ttf',
+        'tangerine': 'Tangerine.ttf',
+        'alex brush': 'AlexBrush.ttf',
+        'parisienne': 'Parisienne.ttf',
+        'dancing script': 'DancingScript.ttf',
+        'playfair display': 'PlayfairDisplay.ttf',
+        'cinzel': 'Cinzel.ttf',
+        'cormorant garamond': 'PlayfairDisplay.ttf',
+        'marcellus': 'Marcellus.ttf',
+        'montserrat': 'Montserrat.ttf',
+        'outfit': 'Outfit.ttf'
+    }
+    
+    filename = font_map.get(clean_name.lower())
+    if filename:
+        font_path = os.path.join(FONTS_DIR, filename)
+        if os.path.exists(font_path):
+            try:
+                return ImageFont.truetype(font_path, size=size)
+            except Exception as e:
+                print(f"Error loading {font_path}: {e}")
+                
+    for sf in ["georgia.ttf", "arial.ttf", "times.ttf"]:
         try:
             return ImageFont.truetype(sf, size=size)
         except Exception:
@@ -137,8 +160,22 @@ def render_card_pillow(filename, layers, preview_width=800, preview_height=1200)
         x = (percent_x / 100.0) * orig_w
         y = (percent_y / 100.0) * orig_h
 
-        font_size = max(14, int(float(layer.get('fontSize', 24)) * scale_y))
         font_family = layer.get('fontFamily', 'Playfair Display')
+
+        font_boost = 1.0
+        clean_family = font_family.lower()
+        if 'tangerine' in clean_family:
+            font_boost = 1.70
+        elif 'great vibes' in clean_family or 'greatvibes' in clean_family:
+            font_boost = 1.40
+        elif 'alex brush' in clean_family or 'alexbrush' in clean_family:
+            font_boost = 1.35
+        elif 'parisienne' in clean_family:
+            font_boost = 1.30
+        elif 'dancing script' in clean_family:
+            font_boost = 1.25
+
+        font_size = max(14, int(float(layer.get('fontSize', 24)) * scale_y * font_boost))
         color_hex = layer.get('color', '#d4af37')
         gradient = layer.get('gradient')
         align = layer.get('align', 'center')
