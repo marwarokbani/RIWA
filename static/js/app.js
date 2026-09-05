@@ -216,56 +216,108 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const btnCopyPhotoPNG = document.getElementById('btnCopyPhotoPNG');
         if (btnCopyPhotoPNG) {
-            btnCopyPhotoPNG.addEventListener('click', () => triggerExport('png'));
+            btnCopyPhotoPNG.addEventListener('click', () => sharePhotoPNGOnly('copy'));
         }
 
         if (btnShareWhatsapp) {
-            btnShareWhatsapp.addEventListener('click', async () => {
-                showToast("Préparation de votre invitation...");
-                const dynamicUrl = await generateDynamicShareCardUrl();
-                const shareText = "Découvrez mon invitation de mariage créée sur RIWA — « Un beau moment commence ici. »";
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + dynamicUrl)}`, '_blank');
-                showToast("Ouverture de WhatsApp...");
-            });
+            btnShareWhatsapp.addEventListener('click', () => sharePhotoPNGOnly('whatsapp'));
         }
         if (btnShareMessenger) {
-            btnShareMessenger.addEventListener('click', async () => {
-                showToast("Préparation de la carte pour Messenger...");
-                const dynamicUrl = await generateDynamicShareCardUrl();
-                
-                try {
-                    await navigator.clipboard.writeText(dynamicUrl);
-                } catch (e) {}
-
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                if (isMobile) {
-                    window.open(`fb-messenger://share/?link=${encodeURIComponent(dynamicUrl)}`, '_blank');
-                }
-                
-                // Universal Facebook / Messenger Share (No App ID required, fetches og:image PNG preview)
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(dynamicUrl)}`, '_blank');
-                showToast("Lien copié dans le presse-papier ! Ouverture de Messenger...");
-            });
+            btnShareMessenger.addEventListener('click', () => sharePhotoPNGOnly('messenger'));
         }
         if (btnShareInstagram) {
-            btnShareInstagram.addEventListener('click', async () => {
-                showToast("Préparation de votre lien d'invitation...");
-                const dynamicUrl = await generateDynamicShareCardUrl();
-                try {
-                    await navigator.clipboard.writeText(dynamicUrl);
-                } catch (e) {}
-                showToast("Lien d'invitation copié ! Prêt à être collé dans votre Story Instagram.");
-            });
+            btnShareInstagram.addEventListener('click', () => sharePhotoPNGOnly('instagram'));
         }
         if (btnCopyLink) {
-            btnCopyLink.addEventListener('click', async () => {
-                showToast("Génération du lien unique...");
-                const dynamicUrl = await generateDynamicShareCardUrl();
-                try {
-                    await navigator.clipboard.writeText(dynamicUrl);
-                } catch (e) {}
-                showToast("Lien de votre carte d'invitation copié !");
+            btnCopyLink.addEventListener('click', () => sharePhotoPNGOnly('copy'));
+        }
+    }
+
+    async function sharePhotoPNGOnly(platform = 'messenger') {
+        if (!state.currentTemplate) return;
+
+        showToast("Préparation de la photo PNG...");
+
+        try {
+            // 1. Generate high-definition PNG image on server side
+            const res = await fetch('/api/share-card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: state.currentTemplate.filename,
+                    layers: state.layers,
+                    previewWidth: cardBgImage.clientWidth || 800,
+                    previewHeight: cardBgImage.clientHeight || 1200
+                })
             });
+
+            const json = await res.json();
+            if (!json.success || !json.image_url) {
+                showToast("Erreur de génération de l'image.");
+                return;
+            }
+
+            // 2. Fetch PNG Blob
+            const imgRes = await fetch(json.image_url);
+            const blob = await imgRes.blob();
+            const pngFile = new File([blob], 'Invitation_RIWA.png', { type: 'image/png' });
+
+            // 3. Smartphone Mobile Native Share (Sends PNG photo directly into Messenger app, ZERO link)
+            if (navigator.canShare && navigator.canShare({ files: [pngFile] })) {
+                try {
+                    await navigator.share({
+                        files: [pngFile]
+                    });
+                    showToast("Photo PNG partagée ! 🎉");
+                    return;
+                } catch (shareErr) {
+                    console.log("Native share cancelled:", shareErr);
+                }
+            }
+
+            // 4. Desktop Web Clipboard Copy (Ctrl+V in Messenger / WhatsApp / Instagram)
+            let copied = false;
+            if (navigator.clipboard && window.ClipboardItem) {
+                try {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    await navigator.clipboard.write([item]);
+                    copied = true;
+                } catch (clipErr) {
+                    console.log("Clipboard write image failed:", clipErr);
+                }
+            }
+
+            // Download PNG photo as convenient backup
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = 'Invitation_RIWA.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+
+            // Open Messenger / WhatsApp directly for pasting Ctrl+V
+            if (platform === 'messenger') {
+                window.open('https://www.messenger.com/t', '_blank');
+                if (copied) {
+                    showToast("📸 Photo PNG copiée ! Faites Ctrl+V (Coller) dans Messenger pour envoyer l'image sans aucun lien !");
+                } else {
+                    showToast("📸 Photo PNG enregistrée ! Glissez l'image dans votre discussion Messenger.");
+                }
+            } else if (platform === 'whatsapp') {
+                window.open('https://web.whatsapp.com', '_blank');
+                showToast(copied ? "📸 Photo PNG copiée ! Faites Ctrl+V dans WhatsApp." : "📸 Photo PNG enregistrée !");
+            } else if (platform === 'instagram') {
+                window.open('https://www.instagram.com/direct/inbox/', '_blank');
+                showToast("📸 Photo PNG enregistrée pour Instagram !");
+            } else {
+                showToast(copied ? "📸 Photo PNG copiée dans le presse-papier (Ctrl+V) !" : "📸 Photo PNG téléchargée !");
+            }
+
+        } catch (err) {
+            console.error("sharePhotoPNGOnly error:", err);
+            showToast("Erreur lors du traitement de la photo.");
         }
     }
 
