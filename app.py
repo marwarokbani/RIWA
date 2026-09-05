@@ -29,6 +29,14 @@ def get_font(font_name, size):
             continue
     return ImageFont.load_default()
 
+def get_external_host_url():
+    """Build external HTTPS base URL for OpenGraph and social previews."""
+    host = request.host
+    scheme = request.headers.get('X-Forwarded-Proto', 'https')
+    if host.startswith('localhost') or host.startswith('127.0.0.1'):
+        scheme = 'http'
+    return f"{scheme}://{host}"
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -52,8 +60,7 @@ def view_shared_card(card_id):
     image_filename = f"card_{clean_id}.png"
     image_path = os.path.join(UPLOADS_DIR, image_filename)
     
-    # Base URL for metadata (uses request.host_url e.g. https://riwa-krtd.onrender.com/)
-    host_url = request.host_url.rstrip('/')
+    host_url = get_external_host_url()
     image_url = f"{host_url}/uploads/{image_filename}"
     page_url = f"{host_url}/card/{clean_id}"
     
@@ -65,33 +72,105 @@ def view_shared_card(card_id):
                            image_url=image_url,
                            page_url=page_url,
                            title="Invitation de Mariage - RIWA",
-                           description="« Un beau moment commence ici. » Découvrez cette magnifique invitation créée sur-mesure.")
+                           description="« Un beau moment commence ici. » Découvrez cette magnifique invitation personnalisée.")
+
+def render_card_pillow(filename, layers, preview_width=800, preview_height=1200):
+    """Render card composite image on server side using Pillow."""
+    card_path = os.path.join(CARDS_DIR, filename)
+    if not os.path.exists(card_path):
+        raise FileNotFoundError(f"Fichier {filename} non trouvé")
+
+    base_img = Image.open(card_path).convert('RGBA')
+    orig_w, orig_h = base_img.size
+    
+    scale_x = orig_w / float(preview_width or 800)
+    scale_y = orig_h / float(preview_height or 1200)
+
+    txt_layer = Image.new('RGBA', base_img.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(txt_layer)
+
+    for layer in layers:
+        content = str(layer.get('text', '')).strip()
+        if not content:
+            continue
+
+        percent_x = float(layer.get('pctX', 50))
+        percent_y = float(layer.get('pctY', 50))
+        
+        x = (percent_x / 100.0) * orig_w
+        y = (percent_y / 100.0) * orig_h
+
+        font_size = max(14, int(float(layer.get('fontSize', 24)) * scale_y))
+        font_family = layer.get('fontFamily', 'Playfair Display')
+        color_hex = layer.get('color', '#d4af37')
+        align = layer.get('align', 'center')
+
+        try:
+            if color_hex.startswith('#'):
+                rgb_color = ImageColor.getrgb(color_hex)
+            else:
+                rgb_color = (212, 175, 55)
+        except Exception:
+            rgb_color = (212, 175, 55)
+            
+        font = get_font(font_family, font_size)
+        lines = content.split('\n')
+
+        line_dims = []
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=font)
+            lw = bbox[2] - bbox[0]
+            lh = bbox[3] - bbox[1]
+            line_dims.append((lw, lh))
+
+        cur_y = y
+        for line, (lw, lh) in zip(lines, line_dims):
+            cur_x = x
+            if align == 'center':
+                cur_x = x - (lw / 2.0)
+            elif align == 'right':
+                cur_x = x - lw
+
+            draw.text((cur_x, cur_y), line, font=font, fill=rgb_color + (255,))
+            cur_y += lh * 1.3
+
+    composite = Image.alpha_composite(base_img, txt_layer).convert('RGB')
+    return composite
 
 @app.route('/api/share-card', methods=['POST'])
 def share_card():
-    """Receive base64 PNG card image from frontend, save to uploads, and return dynamic share URL."""
+    """Receive base64 PNG card image OR JSON payload from frontend, save to uploads, and return dynamic share URL."""
     try:
         import base64
         import uuid
         
         data = request.get_json()
-        if not data or 'image' not in data:
-            return jsonify({'error': 'Image base64 manquante'}), 400
-        
-        img_data_str = data['image']
-        if ',' in img_data_str:
-            img_data_str = img_data_str.split(',')[1]
-            
-        img_bytes = base64.b64decode(img_data_str)
+        if not data:
+            return jsonify({'error': 'Données manquantes'}), 400
         
         card_id = uuid.uuid4().hex[:10]
         filename = f"card_{card_id}.png"
         filepath = os.path.join(UPLOADS_DIR, filename)
-        
-        with open(filepath, 'wb') as f:
-            f.write(img_bytes)
+
+        if 'image' in data and data['image']:
+            img_data_str = data['image']
+            if ',' in img_data_str:
+                img_data_str = img_data_str.split(',')[1]
+            img_bytes = base64.b64decode(img_data_str)
+            with open(filepath, 'wb') as f:
+                f.write(img_bytes)
+        elif 'filename' in data and 'layers' in data:
+            card_filename = data.get('filename')
+            layers = data.get('layers', [])
+            p_w = data.get('previewWidth', 800)
+            p_h = data.get('previewHeight', 1200)
             
-        host_url = request.host_url.rstrip('/')
+            composite = render_card_pillow(card_filename, layers, p_w, p_h)
+            composite.save(filepath, format='PNG', quality=95)
+        else:
+            return jsonify({'error': 'Format de données non reconnu'}), 400
+            
+        host_url = get_external_host_url()
         share_url = f"{host_url}/card/{card_id}"
         image_url = f"{host_url}/uploads/{filename}"
         

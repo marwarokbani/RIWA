@@ -232,8 +232,19 @@ document.addEventListener('DOMContentLoaded', () => {
             btnShareMessenger.addEventListener('click', async () => {
                 showToast("Préparation de la carte pour Messenger...");
                 const dynamicUrl = await generateDynamicShareCardUrl();
-                window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(dynamicUrl)}&app_id=291494419107576&redirect_uri=${encodeURIComponent(dynamicUrl)}`, '_blank');
-                showToast("Ouverture de Messenger...");
+                
+                try {
+                    await navigator.clipboard.writeText(dynamicUrl);
+                } catch (e) {}
+
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                if (isMobile) {
+                    window.open(`fb-messenger://share/?link=${encodeURIComponent(dynamicUrl)}`, '_blank');
+                }
+                
+                // Universal Facebook / Messenger Share (No App ID required, fetches og:image PNG preview)
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(dynamicUrl)}`, '_blank');
+                showToast("Lien copié dans le presse-papier ! Ouverture de Messenger...");
             });
         }
         if (btnShareInstagram) {
@@ -261,6 +272,28 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generateDynamicShareCardUrl() {
         if (!state.currentTemplate) return window.location.href;
 
+        // Try server-side rendering first (100% reliable, zero CORS/canvas taint risk)
+        try {
+            const res = await fetch('/api/share-card', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    filename: state.currentTemplate.filename,
+                    layers: state.layers,
+                    previewWidth: cardBgImage.clientWidth || 800,
+                    previewHeight: cardBgImage.clientHeight || 1200
+                })
+            });
+
+            const json = await res.json();
+            if (json.success && json.share_url) {
+                return json.share_url;
+            }
+        } catch (err) {
+            console.error("Server-side card rendering error:", err);
+        }
+
+        // Fallback to client-side canvas rendering if server fails
         try {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -313,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return json.share_url;
             }
         } catch (err) {
-            console.error("Dynamic card generation error:", err);
+            console.error("Client-side card rendering error:", err);
         }
 
         return window.location.href;
